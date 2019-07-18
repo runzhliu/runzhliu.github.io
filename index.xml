@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>runzhliu</title>
+    <link>https://runzhliu.github.io/</link>
+    <description>Recent content on runzhliu</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Thu, 18 Jul 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://runzhliu.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Mac CPU 相关</title>
+      <link>https://runzhliu.github.io/posts/mac-cpu-%E7%9B%B8%E5%85%B3/</link>
+      <pubDate>Thu, 18 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://runzhliu.github.io/posts/mac-cpu-%E7%9B%B8%E5%85%B3/</guid>
+      <description>1 Monitor  https://support.apple.com/zh-cn/HT201464
+ 这个是 Mac 自带的监视器，可以监视 包括 CPU，内存在内的多种资源，使用简单，可以针对某个进程进行 Kill。
+2 命令模式 2.1 system_profiler SPHardwareDataType 2.2 sysctl sysctl 是可以提取内核状态的命令，具体用法可以 man sysctl 获取全面的手册，以下是从手册中获取的一些与 CPU 有关的指标。
+   Name Type Changeable     hw.activecpu integer no   hw.cpu64bit_capable integer no   hw.cpufamily integer no   hw.cpufrequency integer no   hw.cpufrequency_max integer no   hw.cpufrequency_min integer no   hw.cpusubtype integer no   hw.</description>
+    </item>
+    
+  </channel>
+</rss>
