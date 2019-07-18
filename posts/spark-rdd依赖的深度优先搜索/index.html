@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="author" content="Liu Oscar">
+    <meta name="description" content="runzhliu&#39; personal website">
+    <meta name="keywords" content="blog,developer,personal">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Spark RDD依赖的深度优先搜索"/>
+<meta name="twitter:description" content="1 Overview 最近在刷刷算法题，看到经典的树搜索的算法，正巧之前记得 Spark RDD 中有一处利用 DFS 来判断 RDD 依赖关系的代码，因此专门拿出来分析一下。
+2 Code /** * Return the ancestors of the given RDD that are related to it only through a sequence of * narrow dependencies. This traverses the given RDD&#39;s dependency tree using DFS, but maintains * no ordering on the RDDs returned. */ private[spark] def getNarrowAncestors: Seq[RDD[_]] = { val ancestors = new mutable.HashSet[RDD[_]] def visit(rdd: RDD[_]): Unit = { val narrowDependencies = rdd."/>
+
+    <meta property="og:title" content="Spark RDD依赖的深度优先搜索" />
+<meta property="og:description" content="1 Overview 最近在刷刷算法题，看到经典的树搜索的算法，正巧之前记得 Spark RDD 中有一处利用 DFS 来判断 RDD 依赖关系的代码，因此专门拿出来分析一下。
+2 Code /** * Return the ancestors of the given RDD that are related to it only through a sequence of * narrow dependencies. This traverses the given RDD&#39;s dependency tree using DFS, but maintains * no ordering on the RDDs returned. */ private[spark] def getNarrowAncestors: Seq[RDD[_]] = { val ancestors = new mutable.HashSet[RDD[_]] def visit(rdd: RDD[_]): Unit = { val narrowDependencies = rdd." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://runzhliu.github.io/posts/spark-rdd%E4%BE%9D%E8%B5%96%E7%9A%84%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E6%90%9C%E7%B4%A2/" />
+<meta property="article:published_time" content="2019-07-18T00:00:00&#43;00:00"/>
+<meta property="article:modified_time" content="2019-07-18T00:00:00&#43;00:00"/>
+
+
+    
+      <base href="https://runzhliu.github.io/posts/spark-rdd%E4%BE%9D%E8%B5%96%E7%9A%84%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E6%90%9C%E7%B4%A2/">
+    
+    <title>
+  Spark RDD依赖的深度优先搜索 · runzhliu
+</title>
+
+    
+      <link rel="canonical" href="https://runzhliu.github.io/posts/spark-rdd%E4%BE%9D%E8%B5%96%E7%9A%84%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E6%90%9C%E7%B4%A2/">
+    
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" />
+
+    
+      
+      
+      <link rel="stylesheet" href="https://runzhliu.github.io/css/coder.min.28d751104f30c16da1aa1bb04015cbe662cacfe0d1b01af4f2240ad58580069c.css" integrity="sha256-KNdREE8wwW2hqhuwQBXL5mLKz&#43;DRsBr08iQK1YWABpw=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+
+    
+      <link rel="stylesheet" href="https://runzhliu.github.io/css/custom.css" />
+    
+
+    
+    
+    <link rel="icon" type="image/png" href="https://runzhliu.github.io/img/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="https://runzhliu.github.io/img/favicon-16x16.png" sizes="16x16">
+
+    <meta name="generator" content="Hugo 0.55.4" />
+  </head>
+
+  <body class=" ">
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="https://runzhliu.github.io/">
+      runzhliu
+    </a>
+    <input type="checkbox" id="menu-toggle" />
+    <label class="menu-button float-right" for="menu-toggle"><i class="fas fa-bars"></i></label>
+    <ul class="navigation-list">
+      
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://runzhliu.github.io/posts/">Blog</a>
+          </li>
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://runzhliu.github.io/about/">About</a>
+          </li>
+        
+      
+      
+    </ul>
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">Spark RDD依赖的深度优先搜索</h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fas fa-calendar"></i>
+              <time datetime='2019-07-18T00:00:00Z'>
+                July 18, 2019
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fas fa-clock"></i>
+              2 minutes read
+            </span>
+          </div>
+          
+          
+        </div>
+      </header>
+
+      <div>
+        
+
+<hr />
+
+<h1 id="1-overview">1 Overview</h1>
+
+<p>最近在刷刷算法题，看到经典的树搜索的算法，正巧之前记得 Spark RDD 中有一处利用 DFS 来判断 RDD 依赖关系的代码，因此专门拿出来分析一下。</p>
+
+<h1 id="2-code">2 Code</h1>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-scala" data-lang="scala"><span style="font-style:italic">/**
+</span><span style="font-style:italic">* Return the ancestors of the given RDD that are related to it only through a sequence of
+</span><span style="font-style:italic">* narrow dependencies. This traverses the given RDD&#39;s dependency tree using DFS, but maintains
+</span><span style="font-style:italic">* no ordering on the RDDs returned.
+</span><span style="font-style:italic">*/</span>
+<span style="font-weight:bold">private</span>[<span style="">spark</span>] <span style="font-weight:bold">def</span> getNarrowAncestors<span style="font-weight:bold">:</span> <span style="">Seq</span>[<span style="">RDD</span>[<span style="font-weight:bold">_</span>]] <span style="font-weight:bold">=</span> {
+    <span style="font-weight:bold">val</span> ancestors <span style="font-weight:bold">=</span> <span style="font-weight:bold">new</span> mutable.<span style="font-weight:bold">HashSet</span>[<span style="">RDD</span>[<span style="font-weight:bold">_</span>]]
+    
+    <span style="font-weight:bold">def</span> visit(rdd<span style="font-weight:bold">:</span> <span style="">RDD</span>[<span style="font-weight:bold">_</span>])<span style="font-weight:bold">:</span> <span style="">Unit</span> = {
+      <span style="font-weight:bold">val</span> narrowDependencies <span style="font-weight:bold">=</span> rdd.dependencies.filter(<span style="font-weight:bold">_</span>.isInstanceOf[<span style="">NarrowDependency</span>[<span style="font-weight:bold">_</span>]])
+      <span style="font-weight:bold">val</span> narrowParents <span style="font-weight:bold">=</span> narrowDependencies.map(<span style="font-weight:bold">_</span>.rdd)
+      <span style="font-weight:bold">val</span> narrowParentsNotVisited <span style="font-weight:bold">=</span> narrowParents.filterNot(ancestors.contains)
+      narrowParentsNotVisited.foreach { parent <span style="font-weight:bold">=&gt;</span>
+        ancestors.add(parent)
+        visit(parent)
+      }
+    }
+    
+    visit(<span style="font-weight:bold">this</span>)
+    
+    <span style="font-style:italic">// In case there is a cycle, do not include the root itself
+</span><span style="font-style:italic"></span>    ancestors.filterNot(<span style="font-weight:bold">_</span> == <span style="font-weight:bold">this</span>).toSeq
+}</code></pre></div>
+<h1 id="3-分析">3 分析</h1>
+
+<p>代码很清晰，就是用递归的方式写完这个寻找 RDD 的 Narrow 祖先。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-scala" data-lang="scala"><span style="font-weight:bold">val</span> ancestors <span style="font-weight:bold">=</span> <span style="font-weight:bold">new</span> mutable.<span style="font-weight:bold">HashSet</span>[<span style="">RDD</span>[<span style="font-weight:bold">_</span>]]</code></pre></div>
+<p>ancestors 是一个 Set 数据结构，用来存放已经查找过的 父 RDD。</p>
+
+<p>narrowDependencies, narrowParents, narrowParentsNotVisited 三个变量，按照名字是很容易理解的，分别是找到 RDD 的窄依赖，窄依赖的父依赖以及没有被访问过的窄依赖。</p>
+
+<p>最后这一段，将没有被访问过的父依赖，依次加入 ancetors 表示已经访问过了。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-scala" data-lang="scala">narrowParentsNotVisited.foreach { parent <span style="font-weight:bold">=&gt;</span>
+    ancestors.add(parent)
+    visit(parent)
+}</code></pre></div>
+<p>有心的读者会发现最后一行注释。</p>
+
+<blockquote>
+<p>In case there is a cycle, do not include the root itself</p>
+</blockquote>
+
+<p>大意就是如果如果不去除根节点 RDD，那么 <code>narrowParentsNotVisited</code> 是不能被结束的，意思就是相乘了环而导致循环无法结束。</p>
+
+<h1 id="4-test-case">4 Test Case</h1>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-scala" data-lang="scala"><span style="font-style:italic">// org/apache/spark/rdd/RDDSuite.scala
+</span><span style="font-style:italic"></span>test(<span style="font-style:italic">&#34;getNarrowAncestors&#34;</span>) {
+    <span style="font-weight:bold">val</span> rdd1 <span style="font-weight:bold">=</span> sc.parallelize(1 to 100, 4)
+    <span style="font-weight:bold">val</span> rdd2 <span style="font-weight:bold">=</span> rdd1.filter(<span style="font-weight:bold">_</span> % 2 == 0).map(<span style="font-weight:bold">_</span> + 1)
+    <span style="font-weight:bold">val</span> rdd3 <span style="font-weight:bold">=</span> rdd2.map(<span style="font-weight:bold">_</span> - 1).filter(<span style="font-weight:bold">_</span> &lt; 50).map(i <span style="font-weight:bold">=&gt;</span> (i, i))
+    <span style="font-weight:bold">val</span> rdd4 <span style="font-weight:bold">=</span> rdd3.reduceByKey(<span style="font-weight:bold">_</span> + <span style="font-weight:bold">_</span>)
+    <span style="font-weight:bold">val</span> rdd5 <span style="font-weight:bold">=</span> rdd4.mapValues(<span style="font-weight:bold">_</span> + 1).mapValues(<span style="font-weight:bold">_</span> + 2).mapValues(<span style="font-weight:bold">_</span> + 3)
+    <span style="font-weight:bold">val</span> ancestors1 <span style="font-weight:bold">=</span> rdd1.getNarrowAncestors
+    <span style="font-weight:bold">val</span> ancestors2 <span style="font-weight:bold">=</span> rdd2.getNarrowAncestors
+    <span style="font-weight:bold">val</span> ancestors3 <span style="font-weight:bold">=</span> rdd3.getNarrowAncestors
+    <span style="font-weight:bold">val</span> ancestors4 <span style="font-weight:bold">=</span> rdd4.getNarrowAncestors
+    <span style="font-weight:bold">val</span> ancestors5 <span style="font-weight:bold">=</span> rdd5.getNarrowAncestors
+    
+    <span style="font-style:italic">// Simple dependency tree with a single branch
+</span><span style="font-style:italic"></span>    assert(ancestors1.size === 0)
+    assert(ancestors2.size === 2)
+    assert(ancestors2.count(<span style="font-weight:bold">_</span> === rdd1) === 1)
+    assert(ancestors2.count(<span style="font-weight:bold">_</span>.isInstanceOf[<span style="">MapPartitionsRDD</span>[<span style="font-weight:bold">_</span>, <span style="font-weight:bold">_</span>]]) === 1)
+    assert(ancestors3.size === 5)
+    assert(ancestors3.count(<span style="font-weight:bold">_</span>.isInstanceOf[<span style="">MapPartitionsRDD</span>[<span style="font-weight:bold">_</span>, <span style="font-weight:bold">_</span>]]) === 4)
+    
+    <span style="font-style:italic">// Any ancestors before the shuffle are not considered
+</span><span style="font-style:italic"></span>    assert(ancestors4.size === 0)
+    assert(ancestors4.count(<span style="font-weight:bold">_</span>.isInstanceOf[<span style="">ShuffledRDD</span>[<span style="font-weight:bold">_</span>, <span style="font-weight:bold">_</span>, <span style="font-weight:bold">_</span>]]) === 0)
+    assert(ancestors5.size === 3)
+    assert(ancestors5.count(<span style="font-weight:bold">_</span>.isInstanceOf[<span style="">ShuffledRDD</span>[<span style="font-weight:bold">_</span>, <span style="font-weight:bold">_</span>, <span style="font-weight:bold">_</span>]]) === 1)
+    assert(ancestors5.count(<span style="font-weight:bold">_</span> === rdd3) === 0)
+    assert(ancestors5.count(<span style="font-weight:bold">_</span>.isInstanceOf[<span style="">MapPartitionsRDD</span>[<span style="font-weight:bold">_</span>, <span style="font-weight:bold">_</span>]]) === 2)
+}</code></pre></div>
+<p>建议可以跑一下 RDDSuite.scala 测试类中的关于 <code>getNarrowAncestors</code> 方法。很显然，针对第二部分的情况，窄依赖只跟踪到 shuffle 之前，也就是一个 RDD 血缘遇到 shuffle 操作，那么窄依赖的依赖链条就会重新计数。</p>
+
+      </div>
+
+      <footer>
+        
+
+
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+      </div>
+
+      <footer class="footer">
+  <section class="container">
+    
+      <p>Once a gunner, always a gunner, COYG!</p>
+    
+     © 2019
+    
+       · 
+      Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+    
+    
+  </section>
+</footer>
+
+    </main>
+
+    
+
+  </body>
+
+</html>

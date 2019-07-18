@@ -24,6 +24,16 @@
     </item>
     
     <item>
+      <title>Spark RDD依赖的深度优先搜索</title>
+      <link>https://runzhliu.github.io/posts/spark-rdd%E4%BE%9D%E8%B5%96%E7%9A%84%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E6%90%9C%E7%B4%A2/</link>
+      <pubDate>Thu, 18 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://runzhliu.github.io/posts/spark-rdd%E4%BE%9D%E8%B5%96%E7%9A%84%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E6%90%9C%E7%B4%A2/</guid>
+      <description>1 Overview 最近在刷刷算法题，看到经典的树搜索的算法，正巧之前记得 Spark RDD 中有一处利用 DFS 来判断 RDD 依赖关系的代码，因此专门拿出来分析一下。
+2 Code /** * Return the ancestors of the given RDD that are related to it only through a sequence of * narrow dependencies. This traverses the given RDD&amp;#39;s dependency tree using DFS, but maintains * no ordering on the RDDs returned. */ private[spark] def getNarrowAncestors: Seq[RDD[_]] = { val ancestors = new mutable.HashSet[RDD[_]] def visit(rdd: RDD[_]): Unit = { val narrowDependencies = rdd.</description>
+    </item>
+    
+    <item>
       <title>大规模离线计算产品的调研</title>
       <link>https://runzhliu.github.io/posts/%E5%A4%A7%E8%A7%84%E6%A8%A1%E7%A6%BB%E7%BA%BF%E8%AE%A1%E7%AE%97%E4%BA%A7%E5%93%81%E7%9A%84%E8%B0%83%E7%A0%94/</link>
       <pubDate>Thu, 18 Jul 2019 00:00:00 +0000</pubDate>
