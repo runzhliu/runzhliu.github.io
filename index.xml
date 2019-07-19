@@ -6,10 +6,25 @@
     <description>Recent content on runzhliu</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 18 Jul 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 19 Jul 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://runzhliu.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Flink Session Cluster on K8S</title>
+      <link>https://runzhliu.github.io/posts/flink-session-cluster-on-k8s/</link>
+      <pubDate>Fri, 19 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://runzhliu.github.io/posts/flink-session-cluster-on-k8s/</guid>
+      <description>1 Overview 本文是根据官方文档略加编辑整理出来的。
+2 Setup Kubernetes Mac 环境推荐 Docker for Mac，一键部署。
+实验过程中，应该注意你的 K8S 的版本等信息。
+2 Flink session cluster on Kubernetes Flink session cluster 是作为 K8S 的 Deployment，Flink 的作业会被提交到 session cluster。至于什么是 Deployment，不清楚的同学可以看Deployment。Flink session cluster 会包含以下组件:
+ JobManager 以 Deployment 的方式运行在 K8S 集群 TaskManagers 也是以 Deployment 的方式运行在 K8S 集群 JobManager 的 REST 和 UI 端口通过 Service 部署在 K8S 集群  2.1 Deploy Flink session cluster on Kubernetes 请按照官网的 Appendix将几个文件拷贝到本地。
+然后就是部署，按照以下命令。
+kubectl create -f jobmanager-service.</description>
+    </item>
     
     <item>
       <title>Mac CPU 相关</title>
