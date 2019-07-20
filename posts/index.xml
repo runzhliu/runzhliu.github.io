@@ -22,6 +22,17 @@
     </item>
     
     <item>
+      <title>Flink 集群-任务容器化</title>
+      <link>https://runzhliu.github.io/posts/flink-%E9%9B%86%E7%BE%A4-%E4%BB%BB%E5%8A%A1%E5%AE%B9%E5%99%A8%E5%8C%96/</link>
+      <pubDate>Sat, 20 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://runzhliu.github.io/posts/flink-%E9%9B%86%E7%BE%A4-%E4%BB%BB%E5%8A%A1%E5%AE%B9%E5%99%A8%E5%8C%96/</guid>
+      <description>1 Overview /path/to/flink/flink-container/docker ├── Dockerfile ├── README.md ├── build.sh ├── docker-compose.yml ├── docker-entrypoint.sh └── test-job-cluster.sh 0 directories, 6 files Flink Dockerfile 走读已经介绍了 Flink 的镜像应该如何构建了，接下来，本文解释一下如何利用 Docker 来部署 Flink。
+2 Docker Compose 以下是 docker-compose.yml 的内容。
+# 省略 License # Docker compose file for a Flink job cluster deployment. # 注意下面这些参数的设置 # Parameters: # * FLINK_DOCKER_IMAGE_NAME - Image name to use for the deployment (default: flink-job:latest) # * FLINK_JOB - Name of the Flink job to execute (default: none) # * DEFAULT_PARALLELISM - Default parallelism with which to start the job (default: 1) # * FLINK_JOB_ARGUMENTS - Additional arguments which will be passed to the job cluster (default: none) # * SAVEPOINT_OPTIONS - Savepoint options to start the cluster with (default: none) version: &amp;#34;2.</description>
+    </item>
+    
+    <item>
       <title>Flink Session Cluster on K8S</title>
       <link>https://runzhliu.github.io/posts/flink-session-cluster-on-k8s/</link>
       <pubDate>Fri, 19 Jul 2019 00:00:00 +0000</pubDate>

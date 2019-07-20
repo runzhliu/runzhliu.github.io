@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="author" content="Liu Oscar">
+    <meta name="description" content="runzhliu&#39; personal website">
+    <meta name="keywords" content="blog,developer,personal">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Flink 集群-任务容器化"/>
+<meta name="twitter:description" content="1 Overview /path/to/flink/flink-container/docker ├── Dockerfile ├── README.md ├── build.sh ├── docker-compose.yml ├── docker-entrypoint.sh └── test-job-cluster.sh 0 directories, 6 files Flink Dockerfile 走读已经介绍了 Flink 的镜像应该如何构建了，接下来，本文解释一下如何利用 Docker 来部署 Flink。
+2 Docker Compose 以下是 docker-compose.yml 的内容。
+# 省略 License # Docker compose file for a Flink job cluster deployment. # 注意下面这些参数的设置 # Parameters: # * FLINK_DOCKER_IMAGE_NAME - Image name to use for the deployment (default: flink-job:latest) # * FLINK_JOB - Name of the Flink job to execute (default: none) # * DEFAULT_PARALLELISM - Default parallelism with which to start the job (default: 1) # * FLINK_JOB_ARGUMENTS - Additional arguments which will be passed to the job cluster (default: none) # * SAVEPOINT_OPTIONS - Savepoint options to start the cluster with (default: none) version: &#34;2."/>
+
+    <meta property="og:title" content="Flink 集群-任务容器化" />
+<meta property="og:description" content="1 Overview /path/to/flink/flink-container/docker ├── Dockerfile ├── README.md ├── build.sh ├── docker-compose.yml ├── docker-entrypoint.sh └── test-job-cluster.sh 0 directories, 6 files Flink Dockerfile 走读已经介绍了 Flink 的镜像应该如何构建了，接下来，本文解释一下如何利用 Docker 来部署 Flink。
+2 Docker Compose 以下是 docker-compose.yml 的内容。
+# 省略 License # Docker compose file for a Flink job cluster deployment. # 注意下面这些参数的设置 # Parameters: # * FLINK_DOCKER_IMAGE_NAME - Image name to use for the deployment (default: flink-job:latest) # * FLINK_JOB - Name of the Flink job to execute (default: none) # * DEFAULT_PARALLELISM - Default parallelism with which to start the job (default: 1) # * FLINK_JOB_ARGUMENTS - Additional arguments which will be passed to the job cluster (default: none) # * SAVEPOINT_OPTIONS - Savepoint options to start the cluster with (default: none) version: &#34;2." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://runzhliu.github.io/posts/flink-%E9%9B%86%E7%BE%A4-%E4%BB%BB%E5%8A%A1%E5%AE%B9%E5%99%A8%E5%8C%96/" />
+<meta property="article:published_time" content="2019-07-20T00:00:00&#43;00:00"/>
+<meta property="article:modified_time" content="2019-07-20T00:00:00&#43;00:00"/>
+
+
+    
+      <base href="https://runzhliu.github.io/posts/flink-%E9%9B%86%E7%BE%A4-%E4%BB%BB%E5%8A%A1%E5%AE%B9%E5%99%A8%E5%8C%96/">
+    
+    <title>
+  Flink 集群-任务容器化 · runzhliu
+</title>
+
+    
+      <link rel="canonical" href="https://runzhliu.github.io/posts/flink-%E9%9B%86%E7%BE%A4-%E4%BB%BB%E5%8A%A1%E5%AE%B9%E5%99%A8%E5%8C%96/">
+    
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" />
+
+    
+      
+      
+      <link rel="stylesheet" href="https://runzhliu.github.io/css/coder.min.28d751104f30c16da1aa1bb04015cbe662cacfe0d1b01af4f2240ad58580069c.css" integrity="sha256-KNdREE8wwW2hqhuwQBXL5mLKz&#43;DRsBr08iQK1YWABpw=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+
+    
+      <link rel="stylesheet" href="https://runzhliu.github.io/css/custom.css" />
+    
+
+    
+    
+    <link rel="icon" type="image/png" href="https://runzhliu.github.io/img/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="https://runzhliu.github.io/img/favicon-16x16.png" sizes="16x16">
+
+    <meta name="generator" content="Hugo 0.55.4" />
+  </head>
+
+  <body class=" ">
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="https://runzhliu.github.io/">
+      runzhliu
+    </a>
+    <input type="checkbox" id="menu-toggle" />
+    <label class="menu-button float-right" for="menu-toggle"><i class="fas fa-bars"></i></label>
+    <ul class="navigation-list">
+      
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://runzhliu.github.io/posts/">Blog</a>
+          </li>
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://runzhliu.github.io/about/">About</a>
+          </li>
+        
+      
+      
+    </ul>
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">Flink 集群-任务容器化</h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fas fa-calendar"></i>
+              <time datetime='2019-07-20T00:00:00Z'>
+                July 20, 2019
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fas fa-clock"></i>
+              One minute read
+            </span>
+          </div>
+          
+          
+        </div>
+      </header>
+
+      <div>
+        
+
+<hr />
+
+<h1 id="1-overview">1 Overview</h1>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">/path/to/flink/flink-container/docker
+├── Dockerfile
+├── README.md
+├── build.sh
+├── docker-compose.yml
+├── docker-entrypoint.sh
+└── test-job-cluster.sh
+
+0 directories, 6 files</pre></div>
+<p><a href="https://runzhliu.github.io/posts/flink-dockerfile-%E8%B5%B0%E8%AF%BB/">Flink Dockerfile 走读</a>已经介绍了 Flink 的镜像应该如何构建了，接下来，本文解释一下如何利用 Docker 来部署 Flink。</p>
+
+<h1 id="2-docker-compose">2 Docker Compose</h1>
+
+<p>以下是 docker-compose.yml 的内容。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"># 省略 License
+# Docker compose file for a Flink job cluster deployment.
+# 注意下面这些参数的设置
+# Parameters:
+# * FLINK_DOCKER_IMAGE_NAME - Image name to use for the deployment (default: flink-job:latest)
+# * FLINK_JOB - Name of the Flink job to execute (default: none)
+# * DEFAULT_PARALLELISM - Default parallelism with which to start the job (default: 1)
+# * FLINK_JOB_ARGUMENTS - Additional arguments which will be passed to the job cluster (default: none)
+# * SAVEPOINT_OPTIONS - Savepoint options to start the cluster with (default: none)
+
+version: &#34;2.2&#34;
+services:
+  job-cluster:
+    image: ${FLINK_DOCKER_IMAGE_NAME:-flink-job}
+    ports:
+      - &#34;8081:8081&#34;
+    command: job-cluster --job-classname ${FLINK_JOB} -Djobmanager.rpc.address=job-cluster -Dparallelism.default=${DEFAULT_PARALLELISM:-1} ${SAVEPOINT_OPTIONS} ${FLINK_JOB_ARGUMENTS}
+
+  taskmanager:
+    image: ${FLINK_DOCKER_IMAGE_NAME:-flink-job}
+    command: task-manager -Djobmanager.rpc.address=job-cluster
+    scale: ${DEFAULT_PARALLELISM:-1}</pre></div>
+<h1 id="3-example">3 Example</h1>
+
+<p>好了，万事俱备，现在就在本地跑起来一个 Flink Job on Docker!</p>
+
+<p>首先先构建镜像，可以参考下面的命令，当然这些变量可以根据文档自行定义。因为我没有自己写的用户代码，这里用 Flink 的 Example 下面的 WordCount.jar 来构建镜像，到时候就跑一个 WordCount 的 Job。而且我用的是官网下载的发行版，所以可以看到参数 <code>--from-archive</code>。默认构建的镜像叫做 <code>flink-job:latest</code>。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">./build.sh --from-archive ~/Downloads/flink-1.8.1-bin-scala_2.11.tgz --job-artifacts /Users/runzhliu/Downloads/flink-1.8.1/examples/batch/WordCount.jar</pre></div>
+<p><img src="http://static.zybuluo.com/runzhliu/iqsjyd5bqtlx5hisp6q84ykq/image_1dg6ll62ce86n0daq61lb61q181j.png" alt="image_1dg6ll62ce86n0daq61lb61q181j.png-723.2kB" /></p>
+
+<p>镜像构建好了，就用 docker compose up，启动容器。可以参考下面的命令。注意 <code>FLINK_JOB</code> 需要输入包含包名的类名，否则会找不到类。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">FLINK_JOB=org.apache.flink.examples.java.wordcount.WordCount docker-compose up</pre></div>
+<p><img src="http://static.zybuluo.com/runzhliu/iunl9orsd33y2sasbz79ogqy/image_1dg6lahldmopcnk1df819tjub316.png" alt="image_1dg6lahldmopcnk1df819tjub316.png-522.3kB" /></p>
+
+<p>运行中的日志。</p>
+
+<p><img src="http://static.zybuluo.com/runzhliu/6r683qomv4d0me1yjpi95w9h/image_1dg6l9iff4to1trllth17kf16fvp.png" alt="image_1dg6l9iff4to1trllth17kf16fvp.png-574.4kB" /></p>
+
+<p>如果速度快，可以看到 Flink UI。</p>
+
+<p><img src="http://static.zybuluo.com/runzhliu/96qfnj1wbdc9q2pzm5z0vq2m/image_1dg6l930k4qd1498l3uc41d5dc.png" alt="image_1dg6l930k4qd1498l3uc41d5dc.png-121.3kB" /></p>
+
+<h1 id="4-summary">4 Summary</h1>
+
+<p>根据官方提供的工具，现在就已经可以将 Flink Job 以 Docker 的方式运行起来了，这是给后面将 Flink Job 运行在 K8S 上的基础。</p>
+
+      </div>
+
+      <footer>
+        
+
+
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+      </div>
+
+      <footer class="footer">
+  <section class="container">
+    
+      <p>Once a gunner, always a gunner, COYG!</p>
+    
+     © 2019
+    
+       · 
+      Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+    
+    
+  </section>
+</footer>
+
+    </main>
+
+    
+
+  </body>
+
+</html>
