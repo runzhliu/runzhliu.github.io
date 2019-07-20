@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="author" content="Liu Oscar">
+    <meta name="description" content="runzhliu&#39; personal website">
+    <meta name="keywords" content="blog,developer,personal">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Flink job cluster on Kubernetes"/>
+<meta name="twitter:description" content="1 Overview 之前文章介绍了 Flink session cluster on Kubernetes，需要注意，这种部署方式，可以在同一个 Cluster 上多次提交 Flink Job，而本文介绍的，是一种将任务和镜像绑定的部署方式，即 Flink 集群是不共享的，其组件是单独属于一个 Job。
+2 Creating the job-specific image 可以参考之前另一篇文章。上一篇文章打出来的镜像是一个用了官方提供的 WordCount 例子，在部署 Flink job cluster 的重点在于把用户要运行的 Job 代码放入镜像，此处不赘述了。
+3 Deploy Flink job cluster on Kubernetes 官方提供了 Service 和 Job 的模板用于在 K8S 集群上运行 Flink 任务。这里需要注意，模板里面有两个变量，需要用户自行填写。
+ ${FLINK_IMAGE_NAME}: Flink 镜像文件的名字 ${FLINK_JOB_PARALLELISM}: Flink Job 的并行度，可以理解成需要的 TaskManager 的个数（Pod 数量）  然后官网也提供了一个命令。
+FLINK_IMAGE_NAME=&lt;IMAGE_NAME&gt; FLINK_JOB_PARALLELISM=&lt;PARALLELISM&gt; envsubst &lt; job-cluster-job.yaml.template | kubectl create -f - 当然，直接运行会报错的，除了填充变量以外，envsubst 也是个坑爹的工具，他其实就是用来替换文件中的占位变量的工具，Mac 用户可以通过 brew install gettext，安装完部分用户会发现 envsubst 命令还是用不了，如果不行的用户可以尝试运行下面的命令，直接去找到 envsusbt 运行文件的路径。配置好之后，这个命令就可以运行了。"/>
+
+    <meta property="og:title" content="Flink job cluster on Kubernetes" />
+<meta property="og:description" content="1 Overview 之前文章介绍了 Flink session cluster on Kubernetes，需要注意，这种部署方式，可以在同一个 Cluster 上多次提交 Flink Job，而本文介绍的，是一种将任务和镜像绑定的部署方式，即 Flink 集群是不共享的，其组件是单独属于一个 Job。
+2 Creating the job-specific image 可以参考之前另一篇文章。上一篇文章打出来的镜像是一个用了官方提供的 WordCount 例子，在部署 Flink job cluster 的重点在于把用户要运行的 Job 代码放入镜像，此处不赘述了。
+3 Deploy Flink job cluster on Kubernetes 官方提供了 Service 和 Job 的模板用于在 K8S 集群上运行 Flink 任务。这里需要注意，模板里面有两个变量，需要用户自行填写。
+ ${FLINK_IMAGE_NAME}: Flink 镜像文件的名字 ${FLINK_JOB_PARALLELISM}: Flink Job 的并行度，可以理解成需要的 TaskManager 的个数（Pod 数量）  然后官网也提供了一个命令。
+FLINK_IMAGE_NAME=&lt;IMAGE_NAME&gt; FLINK_JOB_PARALLELISM=&lt;PARALLELISM&gt; envsubst &lt; job-cluster-job.yaml.template | kubectl create -f - 当然，直接运行会报错的，除了填充变量以外，envsubst 也是个坑爹的工具，他其实就是用来替换文件中的占位变量的工具，Mac 用户可以通过 brew install gettext，安装完部分用户会发现 envsubst 命令还是用不了，如果不行的用户可以尝试运行下面的命令，直接去找到 envsusbt 运行文件的路径。配置好之后，这个命令就可以运行了。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://runzhliu.github.io/posts/flink-job-cluster-on-kubernetes/" />
+<meta property="article:published_time" content="2019-07-20T00:00:00&#43;00:00"/>
+<meta property="article:modified_time" content="2019-07-20T00:00:00&#43;00:00"/>
+
+
+    
+      <base href="https://runzhliu.github.io/posts/flink-job-cluster-on-kubernetes/">
+    
+    <title>
+  Flink job cluster on Kubernetes · runzhliu
+</title>
+
+    
+      <link rel="canonical" href="https://runzhliu.github.io/posts/flink-job-cluster-on-kubernetes/">
+    
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" />
+
+    
+      
+      
+      <link rel="stylesheet" href="https://runzhliu.github.io/css/coder.min.28d751104f30c16da1aa1bb04015cbe662cacfe0d1b01af4f2240ad58580069c.css" integrity="sha256-KNdREE8wwW2hqhuwQBXL5mLKz&#43;DRsBr08iQK1YWABpw=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+
+    
+      <link rel="stylesheet" href="https://runzhliu.github.io/css/custom.css" />
+    
+
+    
+    
+    <link rel="icon" type="image/png" href="https://runzhliu.github.io/img/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="https://runzhliu.github.io/img/favicon-16x16.png" sizes="16x16">
+
+    <meta name="generator" content="Hugo 0.55.4" />
+  </head>
+
+  <body class=" ">
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="https://runzhliu.github.io/">
+      runzhliu
+    </a>
+    <input type="checkbox" id="menu-toggle" />
+    <label class="menu-button float-right" for="menu-toggle"><i class="fas fa-bars"></i></label>
+    <ul class="navigation-list">
+      
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://runzhliu.github.io/posts/">Blog</a>
+          </li>
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://runzhliu.github.io/about/">About</a>
+          </li>
+        
+      
+      
+    </ul>
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">Flink job cluster on Kubernetes</h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fas fa-calendar"></i>
+              <time datetime='2019-07-20T00:00:00Z'>
+                July 20, 2019
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fas fa-clock"></i>
+              2 minutes read
+            </span>
+          </div>
+          
+          
+        </div>
+      </header>
+
+      <div>
+        
+
+<hr />
+
+<h1 id="1-overview">1 Overview</h1>
+
+<p>之前文章介绍了 Flink session cluster on Kubernetes，需要注意，这种部署方式，可以在同一个 Cluster 上多次提交 Flink Job，而本文介绍的，是一种将任务和镜像绑定的部署方式，即 Flink 集群是不共享的，其组件是单独属于一个 Job。</p>
+
+<h1 id="2-creating-the-job-specific-image">2 Creating the job-specific image</h1>
+
+<p>可以参考之前另一篇文章。上一篇文章打出来的镜像是一个用了官方提供的 WordCount 例子，在部署 Flink job cluster 的重点在于把用户要运行的 Job 代码放入镜像，此处不赘述了。</p>
+
+<h1 id="3-deploy-flink-job-cluster-on-kubernetes">3 Deploy Flink job cluster on Kubernetes</h1>
+
+<p>官方提供了 Service 和 Job 的模板用于在 K8S 集群上运行 Flink 任务。这里需要注意，模板里面有两个变量，需要用户自行填写。</p>
+
+<ul>
+<li><code>${FLINK_IMAGE_NAME}</code>: Flink 镜像文件的名字</li>
+<li><code>${FLINK_JOB_PARALLELISM}</code>: Flink Job 的并行度，可以理解成需要的 TaskManager 的个数（Pod 数量）</li>
+</ul>
+
+<p>然后官网也提供了一个命令。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">FLINK_IMAGE_NAME=&lt;IMAGE_NAME&gt; FLINK_JOB_PARALLELISM=&lt;PARALLELISM&gt; envsubst &lt; job-cluster-job.yaml.template | kubectl create -f -</pre></div>
+<p>当然，直接运行会报错的，除了填充变量以外，<code>envsubst</code> 也是个坑爹的工具，他其实就是用来替换文件中的占位变量的工具，Mac 用户可以通过 <code>brew install gettext</code>，安装完部分用户会发现 <code>envsubst</code> 命令还是用不了，如果不行的用户可以尝试运行下面的命令，直接去找到 <code>envsusbt</code> 运行文件的路径。配置好之后，这个命令就可以运行了。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">alias envsubst=/usr/local/Cellar/gettext/0.19.8.1/bin/envsubst</pre></div>
+<p>开始在 K8S 中部署 Flink 的组件。</p>
+
+<p>首先部署 Service，基本上就是暴露各服务组件的端口。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="font-style:italic"># 省略 License</span>
+apiVersion: v1
+kind: Service
+metadata:
+  name: flink-job-cluster
+  labels:
+    app: flink
+    component: job-cluster
+spec:
+  ports:
+  - name: rpc
+    port: 6123
+  - name: blob
+    port: 6124
+  - name: query
+    port: 6125
+    nodePort: 30025
+  - name: ui
+    port: 8081
+    nodePort: 30081
+  type: NodePort
+  selector:
+    app: flink
+    component: job-cluster</code></pre></div>
+<p><img src="http://static.zybuluo.com/runzhliu/zl13x9tsmhm57qvwde0jd89p/image_1dg7bqaoq12qq1oh812fjf8f1gmjm.png" alt="image_1dg7bqaoq12qq1oh812fjf8f1gmjm.png-20.7kB" /></p>
+
+<p>然后部署 Job Cluster，通过以下 YAML 文件。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">FLINK_IMAGE_NAME=flink-job:latest FLINK_JOB_PARALLELISM=1 envsubst &lt; job-cluster-job.yaml.template | kubectl create -f -</pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"># 省略了 License
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: flink-job-cluster
+spec:
+  template:
+    metadata:
+      labels:
+        app: flink
+        component: job-cluster
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: flink-job-cluster
+        image: ${FLINK_IMAGE_NAME}
+        # 这是笔者加的，因为需要拉本地的 Docker 镜像
+        imagePullPolicy: IfNotPresent
+        # job-cluster 进程启动的命令
+        args: [&#34;job-cluster&#34;, &#34;-Djobmanager.rpc.address=flink-job-cluster&#34;,
+               &#34;-Dparallelism.default=${FLINK_JOB_PARALLELISM}&#34;, &#34;-Dblob.server.port=6124&#34;, &#34;-Dqueryable-state.server.ports=6125&#34;]
+        ports:
+        - containerPort: 6123
+          name: rpc
+        - containerPort: 6124
+          name: blob
+        - containerPort: 6125
+          name: query
+        - containerPort: 8081
+          name: ui</pre></div>
+<p>然后部署 TaskManager。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">FLINK_IMAGE_NAME=flink-job:latest FLINK_JOB_PARALLELISM=1 envsubst &lt; task-manager-deployment.yaml.template | kubectl create -f -</pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"># 省略 License
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: flink-task-manager
+spec:
+  replicas: ${FLINK_JOB_PARALLELISM}
+  template:
+    metadata:
+      labels:
+        app: flink
+        component: task-manager
+    spec:
+      containers:
+      - name: flink-task-manager
+        image: ${FLINK_IMAGE_NAME}
+        # 先找本地的镜像
+        imagePullPolicy: IfNotPresent
+        # task-manager 启动命令
+        args: [&#34;task-manager&#34;, &#34;-Djobmanager.rpc.address=flink-job-cluster&#34;]</pre></div>
+<p><img src="http://static.zybuluo.com/runzhliu/ik6tv00h1e683jm4fpgc94hd/image_1dg7buhf112au1q2j1arj18u1164713.png" alt="image_1dg7buhf112au1q2j1arj18u1164713.png-118.9kB" /></p>
+
+<p>上图可以看到 Job Cluster 作为 K8S Job 的资源类型，已经运行结束了。</p>
+
+<h1 id="4-summary">4 Summary</h1>
+
+<p>在 K8S 上运行 Flink，目前看来还没有 Spark on K8S 这么成熟，原因是 K8S 并没有作为原生的 Flink 资源调度器（Spark 已经开发了），当然了，我看社区也有人提 PR 了，但是社区似乎还没有十分迫切要把 Flink 和 K8S 结合起来，所以进度上，稍微比 Spark on K8S 要慢一些。</p>
+
+      </div>
+
+      <footer>
+        
+
+
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+      </div>
+
+      <footer class="footer">
+  <section class="container">
+    
+      <p>Once a gunner, always a gunner, COYG!</p>
+    
+     © 2019
+    
+       · 
+      Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+    
+    
+  </section>
+</footer>
+
+    </main>
+
+    
+
+  </body>
+
+</html>
