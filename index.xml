@@ -6,10 +6,20 @@
     <description>Recent content on runzhliu</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Fri, 19 Jul 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 20 Jul 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://runzhliu.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Flink Dockerfile 走读</title>
+      <link>https://runzhliu.github.io/posts/flink-dockerfile-%E8%B5%B0%E8%AF%BB/</link>
+      <pubDate>Sat, 20 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://runzhliu.github.io/posts/flink-dockerfile-%E8%B5%B0%E8%AF%BB/</guid>
+      <description>1 Overview 关于 Flink 的 Docker 相关的配置，可以参考源码这个目录。
+/path/to/flink/flink-container/docker ├── Dockerfile // Dockerfile ├── README.md // 具体的说明，如何创建 Flink 的镜像文件 ├── build.sh // ├── docker-compose.yml // └── docker-entrypoint.sh // Dockerfile 中运行的脚本 2 Dockerfile # 省略了 License，特此声明 FROM openjdk:8-jre-alpine # 安装需要的软件 # snappy 是一个压缩库 # libc6-compat 是 ANSI C 的函数库 RUN apk add --no-cache bash snappy libc6-compat # Flink 容器里的环境变量 # Flink 软件的安装目录在 /opt ENV FLINK_INSTALL_PATH=/opt # Flikn 的解压目录在 /opt/flink ENV FLINK_HOME $FLINK_INSTALL_PATH/flink # Flink 的依赖包目录在 /opt/flink/lib ENV FLINK_LIB_DIR $FLINK_HOME/lib # Flink 的插件目录在 /opt/flink/plugins ENV FLINK_PLUGINS_DIR $FLINK_HOME/plugins # 这个不知道是什么目录 ENV FLINK_OPT_DIR $FLINK_HOME/opt # 这是用户代码的 Jar 包目录，/opt/flink/artifacts ENV FLINK_JOB_ARTIFACTS_DIR $FLINK_INSTALL_PATH/artifacts # 更新一下 PATH，把 Flink 的二进制文件的目录加上 /opt/flink/bin ENV PATH $PATH:$FLINK_HOME/bin # 这些 ARG 可以在构建镜像的时候输入参数，默认值都是 NOT_SET，如果设置了就会去找对应的目录，并且打入镜像里 # Flink 的发行版路径，可以在本地指定任何下载或者自行打包的 Flink 发行版包 ARG flink_dist=NOT_SET # 用户写的业务代码路径 ARG job_artifacts=NOT_SET # Python 的版本，填2或者3 ARG python_version=NOT_SET # Hadoop Jar 包的依赖路径 ARG hadoop_jar=NOT_SET* # 安装 Python，根据前面填的 python_version 这个环境变量，不填就不装 RUN \ if [ &amp;#34;$python_version&amp;#34; = &amp;#34;2&amp;#34; ]; then \ apk add --no-cache python; \ elif [ &amp;#34;$python_version&amp;#34; = &amp;#34;3&amp;#34; ]; then \ apk add --no-cache python3 &amp;amp;&amp;amp; ln -s /usr/bin/python3 /usr/bin/python; \ fi # 把 Flink 发行版和 Hadoop jar（不一定有 Hadoop）放在 /opt/flink 目录 ADD $flink_dist $hadoop_jar $FLINK_INSTALL_PATH/ # 用户代码放在 /opt/artifacts ADD $job_artifacts/* $FLINK_JOB_ARTIFACTS_DIR/ RUN set -x &amp;amp;&amp;amp; \ ln -s $FLINK_INSTALL_PATH/flink-[0-9]* $FLINK_HOME &amp;amp;&amp;amp; \ for jar in $FLINK_JOB_ARTIFACTS_DIR/*.</description>
+    </item>
     
     <item>
       <title>Flink Session Cluster on K8S</title>

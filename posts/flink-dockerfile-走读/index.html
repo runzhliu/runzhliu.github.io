@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="author" content="Liu Oscar">
+    <meta name="description" content="runzhliu&#39; personal website">
+    <meta name="keywords" content="blog,developer,personal">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Flink Dockerfile 走读"/>
+<meta name="twitter:description" content="1 Overview 关于 Flink 的 Docker 相关的配置，可以参考源码这个目录。
+/path/to/flink/flink-container/docker ├── Dockerfile // Dockerfile ├── README.md // 具体的说明，如何创建 Flink 的镜像文件 ├── build.sh // ├── docker-compose.yml // └── docker-entrypoint.sh // Dockerfile 中运行的脚本 2 Dockerfile # 省略了 License，特此声明 FROM openjdk:8-jre-alpine # 安装需要的软件 # snappy 是一个压缩库 # libc6-compat 是 ANSI C 的函数库 RUN apk add --no-cache bash snappy libc6-compat # Flink 容器里的环境变量 # Flink 软件的安装目录在 /opt ENV FLINK_INSTALL_PATH=/opt # Flikn 的解压目录在 /opt/flink ENV FLINK_HOME $FLINK_INSTALL_PATH/flink # Flink 的依赖包目录在 /opt/flink/lib ENV FLINK_LIB_DIR $FLINK_HOME/lib # Flink 的插件目录在 /opt/flink/plugins ENV FLINK_PLUGINS_DIR $FLINK_HOME/plugins # 这个不知道是什么目录 ENV FLINK_OPT_DIR $FLINK_HOME/opt # 这是用户代码的 Jar 包目录，/opt/flink/artifacts ENV FLINK_JOB_ARTIFACTS_DIR $FLINK_INSTALL_PATH/artifacts # 更新一下 PATH，把 Flink 的二进制文件的目录加上 /opt/flink/bin ENV PATH $PATH:$FLINK_HOME/bin # 这些 ARG 可以在构建镜像的时候输入参数，默认值都是 NOT_SET，如果设置了就会去找对应的目录，并且打入镜像里 # Flink 的发行版路径，可以在本地指定任何下载或者自行打包的 Flink 发行版包 ARG flink_dist=NOT_SET # 用户写的业务代码路径 ARG job_artifacts=NOT_SET # Python 的版本，填2或者3 ARG python_version=NOT_SET # Hadoop Jar 包的依赖路径 ARG hadoop_jar=NOT_SET* # 安装 Python，根据前面填的 python_version 这个环境变量，不填就不装 RUN \ if [ &#34;$python_version&#34; = &#34;2&#34; ]; then \ apk add --no-cache python; \ elif [ &#34;$python_version&#34; = &#34;3&#34; ]; then \ apk add --no-cache python3 &amp;&amp; ln -s /usr/bin/python3 /usr/bin/python; \ fi # 把 Flink 发行版和 Hadoop jar（不一定有 Hadoop）放在 /opt/flink 目录 ADD $flink_dist $hadoop_jar $FLINK_INSTALL_PATH/ # 用户代码放在 /opt/artifacts ADD $job_artifacts/* $FLINK_JOB_ARTIFACTS_DIR/ RUN set -x &amp;&amp; \ ln -s $FLINK_INSTALL_PATH/flink-[0-9]* $FLINK_HOME &amp;&amp; \ for jar in $FLINK_JOB_ARTIFACTS_DIR/*."/>
+
+    <meta property="og:title" content="Flink Dockerfile 走读" />
+<meta property="og:description" content="1 Overview 关于 Flink 的 Docker 相关的配置，可以参考源码这个目录。
+/path/to/flink/flink-container/docker ├── Dockerfile // Dockerfile ├── README.md // 具体的说明，如何创建 Flink 的镜像文件 ├── build.sh // ├── docker-compose.yml // └── docker-entrypoint.sh // Dockerfile 中运行的脚本 2 Dockerfile # 省略了 License，特此声明 FROM openjdk:8-jre-alpine # 安装需要的软件 # snappy 是一个压缩库 # libc6-compat 是 ANSI C 的函数库 RUN apk add --no-cache bash snappy libc6-compat # Flink 容器里的环境变量 # Flink 软件的安装目录在 /opt ENV FLINK_INSTALL_PATH=/opt # Flikn 的解压目录在 /opt/flink ENV FLINK_HOME $FLINK_INSTALL_PATH/flink # Flink 的依赖包目录在 /opt/flink/lib ENV FLINK_LIB_DIR $FLINK_HOME/lib # Flink 的插件目录在 /opt/flink/plugins ENV FLINK_PLUGINS_DIR $FLINK_HOME/plugins # 这个不知道是什么目录 ENV FLINK_OPT_DIR $FLINK_HOME/opt # 这是用户代码的 Jar 包目录，/opt/flink/artifacts ENV FLINK_JOB_ARTIFACTS_DIR $FLINK_INSTALL_PATH/artifacts # 更新一下 PATH，把 Flink 的二进制文件的目录加上 /opt/flink/bin ENV PATH $PATH:$FLINK_HOME/bin # 这些 ARG 可以在构建镜像的时候输入参数，默认值都是 NOT_SET，如果设置了就会去找对应的目录，并且打入镜像里 # Flink 的发行版路径，可以在本地指定任何下载或者自行打包的 Flink 发行版包 ARG flink_dist=NOT_SET # 用户写的业务代码路径 ARG job_artifacts=NOT_SET # Python 的版本，填2或者3 ARG python_version=NOT_SET # Hadoop Jar 包的依赖路径 ARG hadoop_jar=NOT_SET* # 安装 Python，根据前面填的 python_version 这个环境变量，不填就不装 RUN \ if [ &#34;$python_version&#34; = &#34;2&#34; ]; then \ apk add --no-cache python; \ elif [ &#34;$python_version&#34; = &#34;3&#34; ]; then \ apk add --no-cache python3 &amp;&amp; ln -s /usr/bin/python3 /usr/bin/python; \ fi # 把 Flink 发行版和 Hadoop jar（不一定有 Hadoop）放在 /opt/flink 目录 ADD $flink_dist $hadoop_jar $FLINK_INSTALL_PATH/ # 用户代码放在 /opt/artifacts ADD $job_artifacts/* $FLINK_JOB_ARTIFACTS_DIR/ RUN set -x &amp;&amp; \ ln -s $FLINK_INSTALL_PATH/flink-[0-9]* $FLINK_HOME &amp;&amp; \ for jar in $FLINK_JOB_ARTIFACTS_DIR/*." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://runzhliu.github.io/posts/flink-dockerfile-%E8%B5%B0%E8%AF%BB/" />
+<meta property="article:published_time" content="2019-07-20T00:00:00&#43;00:00"/>
+<meta property="article:modified_time" content="2019-07-20T00:00:00&#43;00:00"/>
+
+
+    
+      <base href="https://runzhliu.github.io/posts/flink-dockerfile-%E8%B5%B0%E8%AF%BB/">
+    
+    <title>
+  Flink Dockerfile 走读 · runzhliu
+</title>
+
+    
+      <link rel="canonical" href="https://runzhliu.github.io/posts/flink-dockerfile-%E8%B5%B0%E8%AF%BB/">
+    
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" />
+
+    
+      
+      
+      <link rel="stylesheet" href="https://runzhliu.github.io/css/coder.min.28d751104f30c16da1aa1bb04015cbe662cacfe0d1b01af4f2240ad58580069c.css" integrity="sha256-KNdREE8wwW2hqhuwQBXL5mLKz&#43;DRsBr08iQK1YWABpw=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+
+    
+      <link rel="stylesheet" href="https://runzhliu.github.io/css/custom.css" />
+    
+
+    
+    
+    <link rel="icon" type="image/png" href="https://runzhliu.github.io/img/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="https://runzhliu.github.io/img/favicon-16x16.png" sizes="16x16">
+
+    <meta name="generator" content="Hugo 0.55.4" />
+  </head>
+
+  <body class=" ">
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="https://runzhliu.github.io/">
+      runzhliu
+    </a>
+    <input type="checkbox" id="menu-toggle" />
+    <label class="menu-button float-right" for="menu-toggle"><i class="fas fa-bars"></i></label>
+    <ul class="navigation-list">
+      
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://runzhliu.github.io/posts/">Blog</a>
+          </li>
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://runzhliu.github.io/about/">About</a>
+          </li>
+        
+      
+      
+    </ul>
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">Flink Dockerfile 走读</h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fas fa-calendar"></i>
+              <time datetime='2019-07-20T00:00:00Z'>
+                July 20, 2019
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fas fa-clock"></i>
+              2 minutes read
+            </span>
+          </div>
+          
+          
+        </div>
+      </header>
+
+      <div>
+        
+
+<hr />
+
+<h1 id="1-overview">1 Overview</h1>
+
+<p>关于 Flink 的 Docker 相关的配置，可以参考源码这个目录。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">/path/to/flink/flink-container/docker
+├── Dockerfile // Dockerfile
+├── README.md // 具体的说明，如何创建 Flink 的镜像文件
+├── build.sh // 
+├── docker-compose.yml //
+└── docker-entrypoint.sh // Dockerfile 中运行的脚本</pre></div>
+<h1 id="2-dockerfile">2 Dockerfile</h1>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"># 省略了 License，特此声明
+
+FROM openjdk:8-jre-alpine
+
+# 安装需要的软件
+# snappy 是一个压缩库
+# libc6-compat 是 ANSI C 的函数库
+RUN apk add --no-cache bash snappy libc6-compat
+
+# Flink 容器里的环境变量
+# Flink 软件的安装目录在 /opt
+ENV FLINK_INSTALL_PATH=/opt
+# Flikn 的解压目录在 /opt/flink
+ENV FLINK_HOME $FLINK_INSTALL_PATH/flink
+# Flink 的依赖包目录在 /opt/flink/lib
+ENV FLINK_LIB_DIR $FLINK_HOME/lib
+# Flink 的插件目录在 /opt/flink/plugins
+ENV FLINK_PLUGINS_DIR $FLINK_HOME/plugins
+# 这个不知道是什么目录
+ENV FLINK_OPT_DIR $FLINK_HOME/opt
+# 这是用户代码的 Jar 包目录，/opt/flink/artifacts
+ENV FLINK_JOB_ARTIFACTS_DIR $FLINK_INSTALL_PATH/artifacts
+# 更新一下 PATH，把 Flink 的二进制文件的目录加上 /opt/flink/bin
+ENV PATH $PATH:$FLINK_HOME/bin
+
+# 这些 ARG 可以在构建镜像的时候输入参数，默认值都是 NOT_SET，如果设置了就会去找对应的目录，并且打入镜像里
+# Flink 的发行版路径，可以在本地指定任何下载或者自行打包的 Flink 发行版包
+ARG flink_dist=NOT_SET
+# 用户写的业务代码路径
+ARG job_artifacts=NOT_SET
+# Python 的版本，填2或者3
+ARG python_version=NOT_SET
+# Hadoop Jar 包的依赖路径
+ARG hadoop_jar=NOT_SET*
+
+# 安装 Python，根据前面填的 python_version 这个环境变量，不填就不装
+RUN \
+  if [ &#34;$python_version&#34; = &#34;2&#34; ]; then \
+    apk add --no-cache python; \
+  elif [ &#34;$python_version&#34; = &#34;3&#34; ]; then \
+    apk add --no-cache python3 &amp;&amp; ln -s /usr/bin/python3 /usr/bin/python; \
+  fi
+
+# 把 Flink 发行版和 Hadoop jar（不一定有 Hadoop）放在 /opt/flink 目录
+ADD $flink_dist $hadoop_jar $FLINK_INSTALL_PATH/
+# 用户代码放在 /opt/artifacts
+ADD $job_artifacts/* $FLINK_JOB_ARTIFACTS_DIR/
+
+RUN set -x &amp;&amp; \
+  ln -s $FLINK_INSTALL_PATH/flink-[0-9]* $FLINK_HOME &amp;&amp; \
+  for jar in $FLINK_JOB_ARTIFACTS_DIR/*.jar; do [ -f &#34;$jar&#34; ] || continue; ln -s $jar $FLINK_LIB_DIR; done &amp;&amp; \
+  if [ -n &#34;$python_version&#34; ]; then ln -s $FLINK_OPT_DIR/flink-python-*-java-binding.jar $FLINK_LIB_DIR; fi &amp;&amp; \
+  if [ -f ${FLINK_INSTALL_PATH}/flink-shaded-hadoop* ]; then ln -s ${FLINK_INSTALL_PATH}/flink-shaded-hadoop* $FLINK_LIB_DIR; fi &amp;&amp; \
+  # 创建 flink 用户组和 flink 用户，并且更改下面目录的用户权限
+  addgroup -S flink &amp;&amp; adduser -D -S -H -G flink -h $FLINK_HOME flink &amp;&amp; \
+  chown -R flink:flink ${FLINK_INSTALL_PATH}/flink-* &amp;&amp; \
+  chown -R flink:flink ${FLINK_JOB_ARTIFACTS_DIR}/ &amp;&amp; \
+  chown -h flink:flink $FLINK_HOME
+
+# 把这个脚本拷贝到镜像
+COPY docker-entrypoint.sh /
+
+# 切换用户 flink
+USER flink
+# 暴露 8081 和 6123 端口
+EXPOSE 8081 6123
+# 指定容器启动脚本
+ENTRYPOINT [&#34;/docker-entrypoint.sh&#34;]
+# docker run 可以传入 -help 参数
+CMD [&#34;--help&#34;]</pre></div>
+<h1 id="3-entrypoint">3 Entrypoint</h1>
+
+<p>既然分析了 Dockerfile，那么也顺带分析一波 docker-entrypoint.sh 脚本都干了什么事。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"># 同样省略了 License
+# 指定 Flink 的目录
+FLINK_HOME=${FLINK_HOME:-&#34;/opt/flink/bin&#34;}
+
+# 这两个变量分别用于启动 jc 和 tm
+JOB_CLUSTER=&#34;job-cluster&#34;
+TASK_MANAGER=&#34;task-manager&#34;
+
+CMD=&#34;$1&#34;
+shift;
+
+if [ &#34;${CMD}&#34; == &#34;--help&#34; -o &#34;${CMD}&#34; == &#34;-h&#34; ]; then
+    echo &#34;Usage: $(basename $0) (${JOB_CLUSTER}|${TASK_MANAGER})&#34;
+    exit 0
+elif [ &#34;${CMD}&#34; == &#34;${JOB_CLUSTER}&#34; -o &#34;${CMD}&#34; == &#34;${TASK_MANAGER}&#34; ]; then
+    echo &#34;Starting the ${CMD}&#34;
+
+    if [ &#34;${CMD}&#34; == &#34;${TASK_MANAGER}&#34; ]; then
+        # 启动 taskmanager
+        exec $FLINK_HOME/bin/taskmanager.sh start-foreground &#34;$@&#34;
+    else
+        # 启动 standalone-job
+        exec $FLINK_HOME/bin/standalone-job.sh start-foreground &#34;$@&#34;
+    fi
+fi
+
+exec &#34;$@&#34;</pre></div>
+      </div>
+
+      <footer>
+        
+
+
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+      </div>
+
+      <footer class="footer">
+  <section class="container">
+    
+      <p>Once a gunner, always a gunner, COYG!</p>
+    
+     © 2019
+    
+       · 
+      Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+    
+    
+  </section>
+</footer>
+
+    </main>
+
+    
+
+  </body>
+
+</html>
