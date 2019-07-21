@@ -26,6 +26,15 @@ FROM ubuntu ENTRYPOINT [&amp;#34;/bin/ls&amp;#34;] CMD [&amp;#34;-l&amp;#34;, &a
     </item>
     
     <item>
+      <title>a</title>
+      <link>https://runzhliu.github.io/posts/a/</link>
+      <pubDate>Sun, 21 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://runzhliu.github.io/posts/a/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Flink Dockerfile 走读</title>
       <link>https://runzhliu.github.io/posts/flink-dockerfile-%E8%B5%B0%E8%AF%BB/</link>
       <pubDate>Sat, 20 Jul 2019 00:00:00 +0000</pubDate>
