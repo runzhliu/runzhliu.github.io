@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="author" content="Liu Oscar">
+    <meta name="description" content="runzhliu&#39; personal website">
+    <meta name="keywords" content="blog,developer,personal">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="如何判断环境变量为空"/>
+<meta name="twitter:description" content="1 Overview 今天在看 Spark 的脚本的时候，发现很多变量都有用到 {VARIABLE&#43;x} 这种格式，如下：
+... ... ... &amp;&amp; if ! [ -z ${SPARK_MOUNTED_CLASSPATH&#43;x} ]; then SPARK_CLASSPATH=&#34;$SPARK_MOUNTED_CLASSPATH:$SPARK_CLASSPATH&#34;; fi \ ... ... ... -z 很容易理解，在 Shell 脚本里就是表示后面这个变量是否为空，也做 zero 的意思。那后面的 &#43;x 呢？
+2 Example 以下例子是先定义了 VARIABLE 变量为空，然后判断为空的时候输出需要设置环境变量，不为空则打印变量值。
+VARIABLE= if ! [ -z ${VARIABLE} ]; then echo &#34;${VARIABLE}was defined&#34; else echo &#34;Need to set environment var $VARIABLE&#34; &amp;&amp; exit 1; fi 显示结果如下。结果判断是正确的。
+➜ /tmp cat x.sh VARIABLE= if ! [ -z ${VARIABLE} ]; then echo &#34;${VARIABLE} was defined&#34; else echo &#34;Need to set environment var $VARIABLE&#34; &amp;&amp; exit 1; fi ➜ /tmp ."/>
+
+    <meta property="og:title" content="如何判断环境变量为空" />
+<meta property="og:description" content="1 Overview 今天在看 Spark 的脚本的时候，发现很多变量都有用到 {VARIABLE&#43;x} 这种格式，如下：
+... ... ... &amp;&amp; if ! [ -z ${SPARK_MOUNTED_CLASSPATH&#43;x} ]; then SPARK_CLASSPATH=&#34;$SPARK_MOUNTED_CLASSPATH:$SPARK_CLASSPATH&#34;; fi \ ... ... ... -z 很容易理解，在 Shell 脚本里就是表示后面这个变量是否为空，也做 zero 的意思。那后面的 &#43;x 呢？
+2 Example 以下例子是先定义了 VARIABLE 变量为空，然后判断为空的时候输出需要设置环境变量，不为空则打印变量值。
+VARIABLE= if ! [ -z ${VARIABLE} ]; then echo &#34;${VARIABLE}was defined&#34; else echo &#34;Need to set environment var $VARIABLE&#34; &amp;&amp; exit 1; fi 显示结果如下。结果判断是正确的。
+➜ /tmp cat x.sh VARIABLE= if ! [ -z ${VARIABLE} ]; then echo &#34;${VARIABLE} was defined&#34; else echo &#34;Need to set environment var $VARIABLE&#34; &amp;&amp; exit 1; fi ➜ /tmp ." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://runzhliu.github.io/posts/%E5%A6%82%E4%BD%95%E5%88%A4%E6%96%AD%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E4%B8%BA%E7%A9%BA/" />
+<meta property="article:published_time" content="2019-07-21T00:00:00&#43;00:00"/>
+<meta property="article:modified_time" content="2019-07-21T00:00:00&#43;00:00"/>
+
+
+    
+      <base href="https://runzhliu.github.io/posts/%E5%A6%82%E4%BD%95%E5%88%A4%E6%96%AD%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E4%B8%BA%E7%A9%BA/">
+    
+    <title>
+  如何判断环境变量为空 · runzhliu
+</title>
+
+    
+      <link rel="canonical" href="https://runzhliu.github.io/posts/%E5%A6%82%E4%BD%95%E5%88%A4%E6%96%AD%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E4%B8%BA%E7%A9%BA/">
+    
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" />
+
+    
+      
+      
+      <link rel="stylesheet" href="https://runzhliu.github.io/css/coder.min.28d751104f30c16da1aa1bb04015cbe662cacfe0d1b01af4f2240ad58580069c.css" integrity="sha256-KNdREE8wwW2hqhuwQBXL5mLKz&#43;DRsBr08iQK1YWABpw=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+
+    
+      <link rel="stylesheet" href="https://runzhliu.github.io/css/custom.css" />
+    
+
+    
+    
+    <link rel="icon" type="image/png" href="https://runzhliu.github.io/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="https://runzhliu.github.io/images/favicon-16x16.png" sizes="16x16">
+
+    <meta name="generator" content="Hugo 0.55.4" />
+  </head>
+
+  <body class=" ">
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="https://runzhliu.github.io/">
+      runzhliu
+    </a>
+    <input type="checkbox" id="menu-toggle" />
+    <label class="menu-button float-right" for="menu-toggle"><i class="fas fa-bars"></i></label>
+    <ul class="navigation-list">
+      
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://runzhliu.github.io/posts/">Blog</a>
+          </li>
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://runzhliu.github.io/about/">About</a>
+          </li>
+        
+      
+      
+    </ul>
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">如何判断环境变量为空</h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fas fa-calendar"></i>
+              <time datetime='2019-07-21T00:00:00Z'>
+                July 21, 2019
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fas fa-clock"></i>
+              One minute read
+            </span>
+          </div>
+          
+          
+        </div>
+      </header>
+
+      <div>
+        
+
+<hr />
+
+<h1 id="1-overview">1 Overview</h1>
+
+<p>今天在看 Spark 的脚本的时候，发现很多变量都有用到 <code>{VARIABLE+x}</code> 这种格式，如下：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">...
+...
+...
+&amp;&amp; if ! [ -z ${SPARK_MOUNTED_CLASSPATH+x} ]; then SPARK_CLASSPATH=&#34;$SPARK_MOUNTED_CLASSPATH:$SPARK_CLASSPATH&#34;; fi \
+...
+...
+...</pre></div>
+<p><code>-z</code> 很容易理解，在 Shell 脚本里就是表示后面这个变量是否为空，也做 <code>zero</code> 的意思。那后面的 <code>+x</code> 呢？</p>
+
+<h1 id="2-example">2 Example</h1>
+
+<p>以下例子是先定义了 <code>VARIABLE</code> 变量为空，然后判断为空的时候输出需要设置环境变量，不为空则打印变量值。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">VARIABLE=
+<span style="font-weight:bold">if</span> ! [ -z <span style="font-weight:bold;font-style:italic">${</span>VARIABLE<span style="font-weight:bold;font-style:italic">}</span> ]; <span style="font-weight:bold">then</span>
+    echo <span style="font-style:italic">&#34;</span><span style="font-weight:bold;font-style:italic">${</span>VARIABLE<span style="font-weight:bold;font-style:italic">}</span><span style="font-style:italic"> was defined&#34;</span>
+<span style="font-weight:bold">else</span>
+    echo <span style="font-style:italic">&#34;Need to set environment var </span>$VARIABLE<span style="font-style:italic">&#34;</span> &amp;&amp; exit 1;
+<span style="font-weight:bold">fi</span></code></pre></div>
+<p>显示结果如下。结果判断是正确的。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">➜  /tmp cat x.sh
+VARIABLE=
+if ! [ -z ${VARIABLE} ]; then
+    echo &#34;${VARIABLE} was defined&#34;
+else
+    echo &#34;Need to set environment var $VARIABLE&#34; &amp;&amp; exit 1;
+fi
+➜  /tmp ./x.sh
+Need to set environment var</pre></div>
+<p>然后对脚本略加修改，也就是 <code>${VARIABLE+x}</code>。运行后发现，结果有点诡异，明明变量是空的，为什么会报告说变量定义了呢？</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">➜  /tmp cat x.sh
+VARIABLE=
+if ! [ -z ${VARIABLE+x} ]; then
+    echo &#34;${VARIABLE} was defined&#34;
+else
+    echo &#34;Need to set environment var $VARIABLE&#34; &amp;&amp; exit 1;
+fi
+➜  /tmp ./x.sh
+ was defined</pre></div>
+<h1 id="3-stackoverflow">3 StackOverflow</h1>
+
+<p>关于以上的区别，我在 StackOverflow 上找到关键的参考信息。</p>
+
+<blockquote>
+<p><a href="https://stackoverflow.com/questions/3601515/how-to-check-if-a-variable-is-set-in-bash">https://stackoverflow.com/questions/3601515/how-to-check-if-a-variable-is-set-in-bash</a></p>
+</blockquote>
+
+<p>从上面的回答中可以找到相关的文档。</p>
+
+<blockquote>
+<p><a href="http://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html#tag_18_06_02">http://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html#tag_18_06_02</a></p>
+</blockquote>
+
+<p><img src="http://static.zybuluo.com/runzhliu/ribo8r4xzf18xnq1817pcucr/image_1dga0b5kf1613one1g0u8k910do9.png" alt="image_1dga0b5kf1613one1g0u8k910do9.png-131.8kB" /></p>
+
+<p>我大概解释一下，<code>${VARIABLE+x}</code> 这种称为 parameter expansion，这个变量的含义是，如果 <code>VARIABLE</code> 是 unset 或者空的，则会用 <code>x</code> 来替换这个值，最后再用刚刚的例子测试一下。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">➜  /tmp cat x.sh
+VARIABLE=
+if ! [ -z ${VARIABLE+x} ]; then
+    echo &#34;${VARIABLE+x} was defined&#34;
+else
+    echo &#34;Need to set environment var $VARIABLE&#34; &amp;&amp; exit 1;
+fi
+➜  /tmp ./x.sh
+x was defined</pre></div>
+<p>可以看到 <code>VARIABLE</code> 为空值 <code>null</code>，所以会用 <code>x</code> 来替换 <code>${VARIABLE</code> 的值，也就是说此时 <code>${VARIABLE}=x</code>，所以最终会输出 <code>x</code> 的值。</p>
+
+      </div>
+
+      <footer>
+        
+
+
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+      </div>
+
+      <footer class="footer">
+  <section class="container">
+    
+      <p>Once a gunner, always a gunner, COYG!</p>
+    
+     © 2019
+    
+       · 
+      Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+    
+    
+  </section>
+</footer>
+
+    </main>
+
+    
+
+  </body>
+
+</html>

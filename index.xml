@@ -40,6 +40,19 @@ FROM ubuntu ENTRYPOINT [&amp;#34;/bin/ls&amp;#34;] CMD [&amp;#34;-l&amp;#34;, &a
     </item>
     
     <item>
+      <title>如何判断环境变量为空</title>
+      <link>https://runzhliu.github.io/posts/%E5%A6%82%E4%BD%95%E5%88%A4%E6%96%AD%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E4%B8%BA%E7%A9%BA/</link>
+      <pubDate>Sun, 21 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://runzhliu.github.io/posts/%E5%A6%82%E4%BD%95%E5%88%A4%E6%96%AD%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E4%B8%BA%E7%A9%BA/</guid>
+      <description>1 Overview 今天在看 Spark 的脚本的时候，发现很多变量都有用到 {VARIABLE+x} 这种格式，如下：
+... ... ... &amp;amp;&amp;amp; if ! [ -z ${SPARK_MOUNTED_CLASSPATH+x} ]; then SPARK_CLASSPATH=&amp;#34;$SPARK_MOUNTED_CLASSPATH:$SPARK_CLASSPATH&amp;#34;; fi \ ... ... ... -z 很容易理解，在 Shell 脚本里就是表示后面这个变量是否为空，也做 zero 的意思。那后面的 +x 呢？
+2 Example 以下例子是先定义了 VARIABLE 变量为空，然后判断为空的时候输出需要设置环境变量，不为空则打印变量值。
+VARIABLE= if ! [ -z ${VARIABLE} ]; then echo &amp;#34;${VARIABLE}was defined&amp;#34; else echo &amp;#34;Need to set environment var $VARIABLE&amp;#34; &amp;amp;&amp;amp; exit 1; fi 显示结果如下。结果判断是正确的。
+➜ /tmp cat x.sh VARIABLE= if ! [ -z ${VARIABLE} ]; then echo &amp;#34;${VARIABLE} was defined&amp;#34; else echo &amp;#34;Need to set environment var $VARIABLE&amp;#34; &amp;amp;&amp;amp; exit 1; fi ➜ /tmp .</description>
+    </item>
+    
+    <item>
       <title>Flink Dockerfile 走读</title>
       <link>https://runzhliu.github.io/posts/flink-dockerfile-%E8%B5%B0%E8%AF%BB/</link>
       <pubDate>Sat, 20 Jul 2019 00:00:00 +0000</pubDate>
