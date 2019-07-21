@@ -26,7 +26,7 @@ FROM ubuntu ENTRYPOINT [&amp;#34;/bin/ls&amp;#34;] CMD [&amp;#34;-l&amp;#34;, &a
     </item>
     
     <item>
-      <title>RUN, CMD, ENTRYPOINT In Docker</title>
+      <title>RUN, CMD, ENTRYPOINT in Docker</title>
       <link>https://runzhliu.github.io/posts/run-cmd-entrypoint-in-docker/</link>
       <pubDate>Sun, 21 Jul 2019 00:00:00 +0000</pubDate>
       
@@ -50,7 +50,7 @@ FROM ubuntu ENTRYPOINT [&amp;#34;/bin/ls&amp;#34;] CMD [&amp;#34;-l&amp;#34;, &a
     </item>
     
     <item>
-      <title>Flink job cluster on Kubernetes</title>
+      <title>Flink Job Cluster on Kubernetes</title>
       <link>https://runzhliu.github.io/posts/flink-job-cluster-on-kubernetes/</link>
       <pubDate>Sat, 20 Jul 2019 00:00:00 +0000</pubDate>
       

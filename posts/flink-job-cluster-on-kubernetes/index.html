@@ -10,14 +10,14 @@
     <meta name="keywords" content="blog,developer,personal">
 
     <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Flink job cluster on Kubernetes"/>
+<meta name="twitter:title" content="Flink Job Cluster on Kubernetes"/>
 <meta name="twitter:description" content="1 Overview 之前文章介绍了 Flink session cluster on Kubernetes，需要注意，这种部署方式，可以在同一个 Cluster 上多次提交 Flink Job，而本文介绍的，是一种将任务和镜像绑定的部署方式，即 Flink 集群是不共享的，其组件是单独属于一个 Job。
 2 Creating the job-specific image 可以参考之前另一篇文章。上一篇文章打出来的镜像是一个用了官方提供的 WordCount 例子，在部署 Flink job cluster 的重点在于把用户要运行的 Job 代码放入镜像，此处不赘述了。
 3 Deploy Flink job cluster on Kubernetes 官方提供了 Service 和 Job 的模板用于在 K8S 集群上运行 Flink 任务。这里需要注意，模板里面有两个变量，需要用户自行填写。
  ${FLINK_IMAGE_NAME}: Flink 镜像文件的名字 ${FLINK_JOB_PARALLELISM}: Flink Job 的并行度，可以理解成需要的 TaskManager 的个数（Pod 数量）  然后官网也提供了一个命令。
 FLINK_IMAGE_NAME=&lt;IMAGE_NAME&gt; FLINK_JOB_PARALLELISM=&lt;PARALLELISM&gt; envsubst &lt; job-cluster-job.yaml.template | kubectl create -f - 当然，直接运行会报错的，除了填充变量以外，envsubst 也是个坑爹的工具，他其实就是用来替换文件中的占位变量的工具，Mac 用户可以通过 brew install gettext，安装完部分用户会发现 envsubst 命令还是用不了，如果不行的用户可以尝试运行下面的命令，直接去找到 envsusbt 运行文件的路径。配置好之后，这个命令就可以运行了。"/>
 
-    <meta property="og:title" content="Flink job cluster on Kubernetes" />
+    <meta property="og:title" content="Flink Job Cluster on Kubernetes" />
 <meta property="og:description" content="1 Overview 之前文章介绍了 Flink session cluster on Kubernetes，需要注意，这种部署方式，可以在同一个 Cluster 上多次提交 Flink Job，而本文介绍的，是一种将任务和镜像绑定的部署方式，即 Flink 集群是不共享的，其组件是单独属于一个 Job。
 2 Creating the job-specific image 可以参考之前另一篇文章。上一篇文章打出来的镜像是一个用了官方提供的 WordCount 例子，在部署 Flink job cluster 的重点在于把用户要运行的 Job 代码放入镜像，此处不赘述了。
 3 Deploy Flink job cluster on Kubernetes 官方提供了 Service 和 Job 的模板用于在 K8S 集群上运行 Flink 任务。这里需要注意，模板里面有两个变量，需要用户自行填写。
@@ -33,7 +33,7 @@ FLINK_IMAGE_NAME=&lt;IMAGE_NAME&gt; FLINK_JOB_PARALLELISM=&lt;PARALLELISM&gt; en
       <base href="https://runzhliu.github.io/posts/flink-job-cluster-on-kubernetes/">
     
     <title>
-  Flink job cluster on Kubernetes · runzhliu
+  Flink Job Cluster on Kubernetes · runzhliu
 </title>
 
     
@@ -99,7 +99,7 @@ FLINK_IMAGE_NAME=&lt;IMAGE_NAME&gt; FLINK_JOB_PARALLELISM=&lt;PARALLELISM&gt; en
     <article>
       <header>
         <div class="post-title">
-          <h1 class="title">Flink job cluster on Kubernetes</h1>
+          <h1 class="title">Flink Job Cluster on Kubernetes</h1>
         </div>
         <div class="post-meta">
           <div class="date">
