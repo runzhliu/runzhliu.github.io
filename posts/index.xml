@@ -26,11 +26,11 @@ FROM ubuntu ENTRYPOINT [&amp;#34;/bin/ls&amp;#34;] CMD [&amp;#34;-l&amp;#34;, &a
     </item>
     
     <item>
-      <title>RUN vs. CMD vs. ENTRYPOINT In Docker</title>
-      <link>https://runzhliu.github.io/posts/run-vs.-cmd-vs.-entrypoint-in-docker/</link>
+      <title>RUN, CMD, ENTRYPOINT In Docker</title>
+      <link>https://runzhliu.github.io/posts/run-cmd-entrypoint-in-docker/</link>
       <pubDate>Sun, 21 Jul 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://runzhliu.github.io/posts/run-vs.-cmd-vs.-entrypoint-in-docker/</guid>
+      <guid>https://runzhliu.github.io/posts/run-cmd-entrypoint-in-docker/</guid>
       <description>1 Overview 网上的 Dockerfile 很好找，同时也很好 copy，但是当真正需要自己去写 Dockerfile 的时候还是会有不少让人感觉 confused 的地方，就比如 RUN, CMD 和 ENTRYPOINT 这三个指令看上去很类似，很容易混淆，写的时候有些时候能够通用，但是却又得到不同的效果。
 2 Shell 和 Exec 格式 我们可用两种方式指定 RUN、CMD 和 ENTRYPOINT 要运行的命令：Shell 格式和 Exec 格式，二者在使用上有细微的区别。
 2.1 Shell 格式 Shell 格式 &amp;lt;instruction&amp;gt; &amp;lt;command&amp;gt; 例如：

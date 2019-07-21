@@ -10,7 +10,7 @@
     <meta name="keywords" content="blog,developer,personal">
 
     <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="RUN vs. CMD vs. ENTRYPOINT In Docker"/>
+<meta name="twitter:title" content="RUN, CMD, ENTRYPOINT In Docker"/>
 <meta name="twitter:description" content="1 Overview 网上的 Dockerfile 很好找，同时也很好 copy，但是当真正需要自己去写 Dockerfile 的时候还是会有不少让人感觉 confused 的地方，就比如 RUN, CMD 和 ENTRYPOINT 这三个指令看上去很类似，很容易混淆，写的时候有些时候能够通用，但是却又得到不同的效果。
 2 Shell 和 Exec 格式 我们可用两种方式指定 RUN、CMD 和 ENTRYPOINT 要运行的命令：Shell 格式和 Exec 格式，二者在使用上有细微的区别。
 2.1 Shell 格式 Shell 格式 &lt;instruction&gt; &lt;command&gt; 例如：
@@ -18,7 +18,7 @@
 所以上述命令，其实底层是执行了这样的命令。
 # Shell 格式的 Run RUN /bin/sh -c apt-get install python3 # Shell 格式的 CMD CMD /bin/sh -c echo &#34;Hello world&#34; # Shell 格式的 ENTRYPOINT ENTRYPOINT /bin/sh -c echo &#34;Hello world&#34;  例如下面的 Dockerfile 片段，指定了 ENV："/>
 
-    <meta property="og:title" content="RUN vs. CMD vs. ENTRYPOINT In Docker" />
+    <meta property="og:title" content="RUN, CMD, ENTRYPOINT In Docker" />
 <meta property="og:description" content="1 Overview 网上的 Dockerfile 很好找，同时也很好 copy，但是当真正需要自己去写 Dockerfile 的时候还是会有不少让人感觉 confused 的地方，就比如 RUN, CMD 和 ENTRYPOINT 这三个指令看上去很类似，很容易混淆，写的时候有些时候能够通用，但是却又得到不同的效果。
 2 Shell 和 Exec 格式 我们可用两种方式指定 RUN、CMD 和 ENTRYPOINT 要运行的命令：Shell 格式和 Exec 格式，二者在使用上有细微的区别。
 2.1 Shell 格式 Shell 格式 &lt;instruction&gt; &lt;command&gt; 例如：
@@ -26,20 +26,20 @@
 所以上述命令，其实底层是执行了这样的命令。
 # Shell 格式的 Run RUN /bin/sh -c apt-get install python3 # Shell 格式的 CMD CMD /bin/sh -c echo &#34;Hello world&#34; # Shell 格式的 ENTRYPOINT ENTRYPOINT /bin/sh -c echo &#34;Hello world&#34;  例如下面的 Dockerfile 片段，指定了 ENV：" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://runzhliu.github.io/posts/run-vs.-cmd-vs.-entrypoint-in-docker/" />
+<meta property="og:url" content="https://runzhliu.github.io/posts/run-cmd-entrypoint-in-docker/" />
 <meta property="article:published_time" content="2019-07-21T00:00:00&#43;00:00"/>
 <meta property="article:modified_time" content="2019-07-21T00:00:00&#43;00:00"/>
 
 
     
-      <base href="https://runzhliu.github.io/posts/run-vs.-cmd-vs.-entrypoint-in-docker/">
+      <base href="https://runzhliu.github.io/posts/run-cmd-entrypoint-in-docker/">
     
     <title>
-  RUN vs. CMD vs. ENTRYPOINT In Docker · runzhliu
+  RUN, CMD, ENTRYPOINT In Docker · runzhliu
 </title>
 
     
-      <link rel="canonical" href="https://runzhliu.github.io/posts/run-vs.-cmd-vs.-entrypoint-in-docker/">
+      <link rel="canonical" href="https://runzhliu.github.io/posts/run-cmd-entrypoint-in-docker/">
     
 
     <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700" rel="stylesheet">
@@ -101,7 +101,7 @@
     <article>
       <header>
         <div class="post-title">
-          <h1 class="title">RUN vs. CMD vs. ENTRYPOINT In Docker</h1>
+          <h1 class="title">RUN, CMD, ENTRYPOINT In Docker</h1>
         </div>
         <div class="post-meta">
           <div class="date">
