@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="author" content="Liu Oscar">
+    <meta name="description" content="runzhliu&#39; personal website">
+    <meta name="keywords" content="blog,developer,personal">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Docker ENTRYPOINT 笔记"/>
+<meta name="twitter:description" content="1 Overview Docker 中 ENTRYPOINT 一直是个容易混淆的概念，今天浏览了一下官网，简单总结一下。官网的参考链接如下。
+ https://docs.docker.com/search/?q=entrypoint
+ 2 ENTRYPOINT 在 Dockerfile 中，ENTRYPOINT 是作为容器运行的命令存在的，但是他是非必须的，原因是除了可以在 Dockerfile 中填写 ENTRYPOINT，你还可以写 CMD，甚至同时使用两者。
+如果指定了 ENTRYPOINT，大部分的 Docker 镜像都定义了 ENTRYPOINT，即使不写，你依然可以从你的 base 镜像中获取到 ENTRYPOINT，前提当然是 base 镜像有定义。另外，就算你的 Dockerfile 定义了 ENTRYPOINT，你还可以通过命令行的模式，在启动容器的时候提供 --entrypoint 选项来覆盖。下面的例子的含义是，通过 --entrypoint 来覆盖 Dockerfile 里定义的 ENTRYPOINT，然后给 CMD 命令传入 -l /tmp 的命令。
+$ docker run --entrypoint=/bin/ls ubuntu -l /tmp ---结果--- total 0 以上例子，你可以想象成你定义的 Dockerfile 是这样的。
+FROM ubuntu ENTRYPOINT [&#34;/bin/ls&#34;] CMD [&#34;-l&#34;, &#34;/tmp&#34;] 3 Summary 实践中，ENTRYPOINT 并不会经常被覆盖，但是如果镜像文件中指定了 ENTRYPOINT，那么一定程度上，会让你的镜像更 flexible，或者说更容易使用。"/>
+
+    <meta property="og:title" content="Docker ENTRYPOINT 笔记" />
+<meta property="og:description" content="1 Overview Docker 中 ENTRYPOINT 一直是个容易混淆的概念，今天浏览了一下官网，简单总结一下。官网的参考链接如下。
+ https://docs.docker.com/search/?q=entrypoint
+ 2 ENTRYPOINT 在 Dockerfile 中，ENTRYPOINT 是作为容器运行的命令存在的，但是他是非必须的，原因是除了可以在 Dockerfile 中填写 ENTRYPOINT，你还可以写 CMD，甚至同时使用两者。
+如果指定了 ENTRYPOINT，大部分的 Docker 镜像都定义了 ENTRYPOINT，即使不写，你依然可以从你的 base 镜像中获取到 ENTRYPOINT，前提当然是 base 镜像有定义。另外，就算你的 Dockerfile 定义了 ENTRYPOINT，你还可以通过命令行的模式，在启动容器的时候提供 --entrypoint 选项来覆盖。下面的例子的含义是，通过 --entrypoint 来覆盖 Dockerfile 里定义的 ENTRYPOINT，然后给 CMD 命令传入 -l /tmp 的命令。
+$ docker run --entrypoint=/bin/ls ubuntu -l /tmp ---结果--- total 0 以上例子，你可以想象成你定义的 Dockerfile 是这样的。
+FROM ubuntu ENTRYPOINT [&#34;/bin/ls&#34;] CMD [&#34;-l&#34;, &#34;/tmp&#34;] 3 Summary 实践中，ENTRYPOINT 并不会经常被覆盖，但是如果镜像文件中指定了 ENTRYPOINT，那么一定程度上，会让你的镜像更 flexible，或者说更容易使用。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://runzhliu.github.io/posts/docker-entrypoint-%E7%AC%94%E8%AE%B0/" />
+<meta property="article:published_time" content="2019-07-21T00:00:00&#43;00:00"/>
+<meta property="article:modified_time" content="2019-07-21T00:00:00&#43;00:00"/>
+
+
+    
+      <base href="https://runzhliu.github.io/posts/docker-entrypoint-%E7%AC%94%E8%AE%B0/">
+    
+    <title>
+  Docker ENTRYPOINT 笔记 · runzhliu
+</title>
+
+    
+      <link rel="canonical" href="https://runzhliu.github.io/posts/docker-entrypoint-%E7%AC%94%E8%AE%B0/">
+    
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" />
+
+    
+      
+      
+      <link rel="stylesheet" href="https://runzhliu.github.io/css/coder.min.28d751104f30c16da1aa1bb04015cbe662cacfe0d1b01af4f2240ad58580069c.css" integrity="sha256-KNdREE8wwW2hqhuwQBXL5mLKz&#43;DRsBr08iQK1YWABpw=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+
+    
+      <link rel="stylesheet" href="https://runzhliu.github.io/css/custom.css" />
+    
+
+    
+    
+    <link rel="icon" type="image/png" href="https://runzhliu.github.io/img/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="https://runzhliu.github.io/img/favicon-16x16.png" sizes="16x16">
+
+    <meta name="generator" content="Hugo 0.55.4" />
+  </head>
+
+  <body class=" ">
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="https://runzhliu.github.io/">
+      runzhliu
+    </a>
+    <input type="checkbox" id="menu-toggle" />
+    <label class="menu-button float-right" for="menu-toggle"><i class="fas fa-bars"></i></label>
+    <ul class="navigation-list">
+      
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://runzhliu.github.io/posts/">Blog</a>
+          </li>
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://runzhliu.github.io/about/">About</a>
+          </li>
+        
+      
+      
+    </ul>
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">Docker ENTRYPOINT 笔记</h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fas fa-calendar"></i>
+              <time datetime='2019-07-21T00:00:00Z'>
+                July 21, 2019
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fas fa-clock"></i>
+              One minute read
+            </span>
+          </div>
+          
+          
+        </div>
+      </header>
+
+      <div>
+        
+
+<hr />
+
+<h1 id="1-overview">1 Overview</h1>
+
+<p>Docker 中 <code>ENTRYPOINT</code> 一直是个容易混淆的概念，今天浏览了一下官网，简单总结一下。官网的参考链接如下。</p>
+
+<blockquote>
+<p><a href="https://docs.docker.com/search/?q=entrypoint">https://docs.docker.com/search/?q=entrypoint</a></p>
+</blockquote>
+
+<p><img src="http://static.zybuluo.com/runzhliu/sse9uydy84n4of0375heouzg/image_1dg93lijh8v59ueu337fbfgop.png" alt="image_1dg93lijh8v59ueu337fbfgop.png-240.8kB" /></p>
+
+<h1 id="2-entrypoint">2 ENTRYPOINT</h1>
+
+<p>在 Dockerfile 中，<code>ENTRYPOINT</code> 是作为容器运行的命令存在的，但是他是非必须的，原因是除了可以在 Dockerfile 中填写 <code>ENTRYPOINT</code>，你还可以写 <code>CMD</code>，甚至同时使用两者。</p>
+
+<p>如果指定了 <code>ENTRYPOINT</code>，大部分的 Docker 镜像都定义了 <code>ENTRYPOINT</code>，即使不写，你依然可以从你的 base 镜像中获取到 <code>ENTRYPOINT</code>，前提当然是 base 镜像有定义。另外，就算你的 Dockerfile 定义了 <code>ENTRYPOINT</code>，你还可以通过命令行的模式，在启动容器的时候提供 <code>--entrypoint</code> 选项来覆盖。下面的例子的含义是，通过 <code>--entrypoint</code> 来覆盖 Dockerfile 里定义的 <code>ENTRYPOINT</code>，然后给 <code>CMD</code> 命令传入 <code>-l /tmp</code> 的命令。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ docker run --entrypoint=/bin/ls ubuntu -l /tmp
+---结果---
+total 0</code></pre></div>
+<p>以上例子，你可以想象成你定义的 Dockerfile 是这样的。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">FROM  ubuntu
+ENTRYPOINT [&#34;/bin/ls&#34;]
+CMD [&#34;-l&#34;, &#34;/tmp&#34;]</pre></div>
+<h1 id="3-summary">3 Summary</h1>
+
+<p>实践中，<code>ENTRYPOINT</code> 并不会经常被覆盖，但是如果镜像文件中指定了 <code>ENTRYPOINT</code>，那么一定程度上，会让你的镜像更 flexible，或者说更容易使用。</p>
+
+<p>举个 Spark 官方提供的 Dockerfile 为例，最后也是使用了 <code>ENTRYPOINT</code>，那么他的灵活性体现在哪里呢？</p>
+
+<p>我运行镜像的时候，可以通过 <code>--entrypoint</code> 来覆盖默认的 <code>ENTRYPOINT</code> 命令，比如我想看看镜像里的文件的时候，可以这么干。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">$ docker run --entrypoint=/bin/ls spark:tenc-spark -l /opt/spark
+---结果---
+total 40
+-rw-r--r--    1 root     root             0 Jul 21 01:57 RELEASE
+drwxr-xr-x    2 root     root          4096 Jul 21 01:57 bin
+drwxr-xr-x    2 root     root          4096 Jul 21 01:57 conf
+drwxr-xr-x    5 root     root          4096 Jul 21 01:57 data
+drwxr-xr-x    4 root     root          4096 Jul 21 01:57 examples
+drwxr-xr-x    2 root     root         12288 Jul 21 01:57 jars
+drwxr-xr-x    2 root     root          4096 Jul 21 01:57 sbin
+drwxr-xr-x    2 root     root          4096 Jul 21 01:57 tests
+drwxr-xr-x    2 root     root          4096 Jul 21 01:57 work-dir</pre></div>
+      </div>
+
+      <footer>
+        
+
+
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+      </div>
+
+      <footer class="footer">
+  <section class="container">
+    
+      <p>Once a gunner, always a gunner, COYG!</p>
+    
+     © 2019
+    
+       · 
+      Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+    
+    
+  </section>
+</footer>
+
+    </main>
+
+    
+
+  </body>
+
+</html>

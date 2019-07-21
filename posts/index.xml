@@ -6,10 +6,24 @@
     <description>Recent content in Posts on runzhliu</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Sat, 20 Jul 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 21 Jul 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://runzhliu.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Docker ENTRYPOINT 笔记</title>
+      <link>https://runzhliu.github.io/posts/docker-entrypoint-%E7%AC%94%E8%AE%B0/</link>
+      <pubDate>Sun, 21 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://runzhliu.github.io/posts/docker-entrypoint-%E7%AC%94%E8%AE%B0/</guid>
+      <description>1 Overview Docker 中 ENTRYPOINT 一直是个容易混淆的概念，今天浏览了一下官网，简单总结一下。官网的参考链接如下。
+ https://docs.docker.com/search/?q=entrypoint
+ 2 ENTRYPOINT 在 Dockerfile 中，ENTRYPOINT 是作为容器运行的命令存在的，但是他是非必须的，原因是除了可以在 Dockerfile 中填写 ENTRYPOINT，你还可以写 CMD，甚至同时使用两者。
+如果指定了 ENTRYPOINT，大部分的 Docker 镜像都定义了 ENTRYPOINT，即使不写，你依然可以从你的 base 镜像中获取到 ENTRYPOINT，前提当然是 base 镜像有定义。另外，就算你的 Dockerfile 定义了 ENTRYPOINT，你还可以通过命令行的模式，在启动容器的时候提供 --entrypoint 选项来覆盖。下面的例子的含义是，通过 --entrypoint 来覆盖 Dockerfile 里定义的 ENTRYPOINT，然后给 CMD 命令传入 -l /tmp 的命令。
+$ docker run --entrypoint=/bin/ls ubuntu -l /tmp ---结果--- total 0 以上例子，你可以想象成你定义的 Dockerfile 是这样的。
+FROM ubuntu ENTRYPOINT [&amp;#34;/bin/ls&amp;#34;] CMD [&amp;#34;-l&amp;#34;, &amp;#34;/tmp&amp;#34;] 3 Summary 实践中，ENTRYPOINT 并不会经常被覆盖，但是如果镜像文件中指定了 ENTRYPOINT，那么一定程度上，会让你的镜像更 flexible，或者说更容易使用。</description>
+    </item>
     
     <item>
       <title>Flink Dockerfile 走读</title>
