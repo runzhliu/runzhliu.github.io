@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="author" content="Liu Oscar">
+    <meta name="description" content="runzhliu&#39; personal website">
+    <meta name="keywords" content="blog,developer,personal">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="RUN vs. CMD vs. ENTRYPOINT In Docker"/>
+<meta name="twitter:description" content="1 Overview 网上的 Dockerfile 很好找，同时也很好 copy，但是当真正需要自己去写 Dockerfile 的时候还是会有不少让人感觉 confused 的地方，就比如 RUN, CMD 和 ENTRYPOINT 这三个指令看上去很类似，很容易混淆，写的时候有些时候能够通用，但是却又得到不同的效果。
+2 Shell 和 Exec 格式 我们可用两种方式指定 RUN、CMD 和 ENTRYPOINT 要运行的命令：Shell 格式和 Exec 格式，二者在使用上有细微的区别。
+2.1 Shell 格式 Shell 格式 &lt;instruction&gt; &lt;command&gt; 例如：
+# Shell 格式的 Run RUN apt-get install python3 # Shell 格式的 CMD CMD echo &#34;Hello world&#34; # Shell 格式的 ENTRYPOINT ENTRYPOINT echo &#34;Hello world&#34;  当指令执行时，Shell 格式底层会调用 /bin/sh -c &lt;command&gt;。
+所以上述命令，其实底层是执行了这样的命令。
+# Shell 格式的 Run RUN /bin/sh -c apt-get install python3 # Shell 格式的 CMD CMD /bin/sh -c echo &#34;Hello world&#34; # Shell 格式的 ENTRYPOINT ENTRYPOINT /bin/sh -c echo &#34;Hello world&#34;  例如下面的 Dockerfile 片段，指定了 ENV："/>
+
+    <meta property="og:title" content="RUN vs. CMD vs. ENTRYPOINT In Docker" />
+<meta property="og:description" content="1 Overview 网上的 Dockerfile 很好找，同时也很好 copy，但是当真正需要自己去写 Dockerfile 的时候还是会有不少让人感觉 confused 的地方，就比如 RUN, CMD 和 ENTRYPOINT 这三个指令看上去很类似，很容易混淆，写的时候有些时候能够通用，但是却又得到不同的效果。
+2 Shell 和 Exec 格式 我们可用两种方式指定 RUN、CMD 和 ENTRYPOINT 要运行的命令：Shell 格式和 Exec 格式，二者在使用上有细微的区别。
+2.1 Shell 格式 Shell 格式 &lt;instruction&gt; &lt;command&gt; 例如：
+# Shell 格式的 Run RUN apt-get install python3 # Shell 格式的 CMD CMD echo &#34;Hello world&#34; # Shell 格式的 ENTRYPOINT ENTRYPOINT echo &#34;Hello world&#34;  当指令执行时，Shell 格式底层会调用 /bin/sh -c &lt;command&gt;。
+所以上述命令，其实底层是执行了这样的命令。
+# Shell 格式的 Run RUN /bin/sh -c apt-get install python3 # Shell 格式的 CMD CMD /bin/sh -c echo &#34;Hello world&#34; # Shell 格式的 ENTRYPOINT ENTRYPOINT /bin/sh -c echo &#34;Hello world&#34;  例如下面的 Dockerfile 片段，指定了 ENV：" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://runzhliu.github.io/posts/run-vs.-cmd-vs.-entrypoint-in-docker/" />
+<meta property="article:published_time" content="2019-07-21T00:00:00&#43;00:00"/>
+<meta property="article:modified_time" content="2019-07-21T00:00:00&#43;00:00"/>
+
+
+    
+      <base href="https://runzhliu.github.io/posts/run-vs.-cmd-vs.-entrypoint-in-docker/">
+    
+    <title>
+  RUN vs. CMD vs. ENTRYPOINT In Docker · runzhliu
+</title>
+
+    
+      <link rel="canonical" href="https://runzhliu.github.io/posts/run-vs.-cmd-vs.-entrypoint-in-docker/">
+    
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" />
+
+    
+      
+      
+      <link rel="stylesheet" href="https://runzhliu.github.io/css/coder.min.28d751104f30c16da1aa1bb04015cbe662cacfe0d1b01af4f2240ad58580069c.css" integrity="sha256-KNdREE8wwW2hqhuwQBXL5mLKz&#43;DRsBr08iQK1YWABpw=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+
+    
+      <link rel="stylesheet" href="https://runzhliu.github.io/css/custom.css" />
+    
+
+    
+    
+    <link rel="icon" type="image/png" href="https://runzhliu.github.io/img/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="https://runzhliu.github.io/img/favicon-16x16.png" sizes="16x16">
+
+    <meta name="generator" content="Hugo 0.55.4" />
+  </head>
+
+  <body class=" ">
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="https://runzhliu.github.io/">
+      runzhliu
+    </a>
+    <input type="checkbox" id="menu-toggle" />
+    <label class="menu-button float-right" for="menu-toggle"><i class="fas fa-bars"></i></label>
+    <ul class="navigation-list">
+      
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://runzhliu.github.io/posts/">Blog</a>
+          </li>
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://runzhliu.github.io/about/">About</a>
+          </li>
+        
+      
+      
+    </ul>
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">RUN vs. CMD vs. ENTRYPOINT In Docker</h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fas fa-calendar"></i>
+              <time datetime='2019-07-21T00:00:00Z'>
+                July 21, 2019
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fas fa-clock"></i>
+              2 minutes read
+            </span>
+          </div>
+          
+          
+        </div>
+      </header>
+
+      <div>
+        
+
+<hr />
+
+<h1 id="1-overview">1 Overview</h1>
+
+<p>网上的 Dockerfile 很好找，同时也很好 copy，但是当真正需要自己去写 Dockerfile 的时候还是会有不少让人感觉 confused 的地方，就比如  <code>RUN</code>, <code>CMD</code> 和 <code>ENTRYPOINT</code> 这三个指令看上去很类似，很容易混淆，写的时候有些时候能够通用，但是却又得到不同的效果。</p>
+
+<h1 id="2-shell-和-exec-格式">2 Shell 和 Exec 格式</h1>
+
+<p>我们可用两种方式指定 <code>RUN</code>、<code>CMD</code> 和 <code>ENTRYPOINT</code> 要运行的命令：Shell 格式和 Exec 格式，二者在使用上有细微的区别。</p>
+
+<h2 id="2-1-shell-格式">2.1 Shell 格式</h2>
+
+<p>Shell 格式 <code>&lt;instruction&gt; &lt;command&gt;</code> 例如：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="font-style:italic"># Shell 格式的 Run</span>
+RUN apt-get install python3
+<span style="font-style:italic"># Shell 格式的 CMD</span>
+CMD echo <span style="font-style:italic">&#34;Hello world&#34;</span>  
+<span style="font-style:italic"># Shell 格式的 ENTRYPOINT</span>
+ENTRYPOINT echo <span style="font-style:italic">&#34;Hello world&#34;</span> </code></pre></div>
+<p>当指令执行时，Shell 格式底层会调用 <code>/bin/sh -c &lt;command&gt;</code>。</p>
+
+<p>所以上述命令，其实底层是执行了这样的命令。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="font-style:italic"># Shell 格式的 Run</span>
+RUN /bin/sh -c apt-get install python3
+<span style="font-style:italic"># Shell 格式的 CMD</span>
+CMD /bin/sh -c echo <span style="font-style:italic">&#34;Hello world&#34;</span>  
+<span style="font-style:italic"># Shell 格式的 ENTRYPOINT</span>
+ENTRYPOINT /bin/sh -c echo <span style="font-style:italic">&#34;Hello world&#34;</span> </code></pre></div>
+<p>例如下面的 Dockerfile 片段，指定了 <code>ENV</code>：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">ENV name runzhliu  
+ENTRYPOINT echo <span style="font-style:italic">&#34;Hello, </span>$name<span style="font-style:italic">&#34;</span> </code></pre></div>
+<p>执行 <code>docker run &lt;image&gt;</code> 将输出：<code>Hello, runzhliu</code>，注意环境变量 <code>name</code> 已经被值替换。因为其底层执行的命令是这样的 <code>/bin/sh -c echo &quot;Hello, $name&quot;</code>。</p>
+
+<h2 id="2-2-exec-格式">2.2 Exec 格式</h2>
+
+<p>Exec 格式 <code>&lt;instruction&gt; [&quot;executable&quot;, &quot;param1&quot;, &quot;param2&quot;, ...]</code></p>
+
+<p>例如：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="font-style:italic"># Exec 格式的 Run</span>
+RUN [<span style="font-style:italic">&#34;apt-get&#34;</span>, <span style="font-style:italic">&#34;install&#34;</span>, <span style="font-style:italic">&#34;python3&#34;</span>]  
+<span style="font-style:italic"># Exec 格式的 CMD</span>
+CMD [<span style="font-style:italic">&#34;/bin/echo&#34;</span>, <span style="font-style:italic">&#34;Hello world&#34;</span>]
+<span style="font-style:italic"># Exec 格式的 Entrypoint</span>
+ENTRYPOINT [<span style="font-style:italic">&#34;/bin/echo&#34;</span>, <span style="font-style:italic">&#34;Hello world&#34;</span>]</code></pre></div>
+<p>当指令执行时，会直接调用命令，不会被 Shell 解析。例如下面的 Dockerfile 片段：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">ENV name runzhliu
+ENTRYPOINT [<span style="font-style:italic">&#34;/bin/echo&#34;</span>, <span style="font-style:italic">&#34;Hello, </span>$name<span style="font-style:italic">&#34;</span>]</code></pre></div>
+<p>运行容器将输出：<code>Hello, $name</code>。注意环境变量 “name” 没有被替换。如果希望使用环境变量，照如下修改：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">ENV name runzhliu
+ENTRYPOINT [<span style="font-style:italic">&#34;/bin/sh&#34;</span>, <span style="font-style:italic">&#34;-c&#34;</span>, <span style="font-style:italic">&#34;echo Hello, </span>$name<span style="font-style:italic">&#34;</span>]</code></pre></div>
+<p>运行容器将输出： <code>Hello, runzhliu</code></p>
+
+<p><code>CMD, ENTRYPOINT</code> 推荐使用 <code>Exec</code> 格式，因为指令可读性更强，更容易理解。<code>RUN</code> 则两种格式都可以。</p>
+
+<h1 id="3-run">3 RUN</h1>
+
+<p><code>RUN</code> 指令通常用于<strong>安装应用和软件包</strong>。在当前镜像的顶部执行命令，并通过创建新的镜像层。Dockerfile 中常常包含多个 <code>RUN</code> 指令。</p>
+
+<p><code>RUN</code> 有两种格式：</p>
+
+<ol>
+<li>Shell 格式：<code>RUN</code></li>
+<li>Exec 格式：<code>RUN [&quot;executable&quot;, &quot;param1&quot;, &quot;param2&quot;]</code></li>
+</ol>
+
+<p>下面是使用 RUN 安装多个包的例子：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">RUN apt-get update &amp;&amp; apt-get install -y <span style="font-weight:bold;font-style:italic">\ </span> 
+bzr <span style="font-weight:bold;font-style:italic">\
+</span><span style="font-weight:bold;font-style:italic"></span>cvs <span style="font-weight:bold;font-style:italic">\
+</span><span style="font-weight:bold;font-style:italic"></span>git <span style="font-weight:bold;font-style:italic">\
+</span><span style="font-weight:bold;font-style:italic"></span>mercurial <span style="font-weight:bold;font-style:italic">\
+</span><span style="font-weight:bold;font-style:italic"></span>subversion</code></pre></div>
+<p>注意：<code>apt-get update</code> 和 <code>apt-get install</code> 被放在一个 <code>RUN</code> 指令中执行，<strong>这样能够保证每次安装的是最新的包</strong>。如果 <code>apt-get install</code> 在单独的 <code>RUN</code> 中执行，则会使用 <code>apt-get update</code> 创建的镜像层，<strong>而这一层可能是很久以前缓存的</strong>。</p>
+
+<h1 id="4-cmd">4 CMD</h1>
+
+<p><code>CMD</code> 指令允许用户指定容器的<strong>默认执行的命令</strong>。此命令会在容器启动且 <code>docker run</code> <strong>没有指定其他命令</strong>时运行。</p>
+
+<p>如果 <code>docker run</code> 指定了其他命令，<code>CMD</code> 指定的默认命令将被忽略。如果 Dockerfile 中有多个 <code>CMD</code> 指令，只有最后一个 <code>CMD</code> 有效，当然一般不会写多个 <code>CMD</code> 命令在 Dockerfile 中。</p>
+
+<p>如本文开头说的，<code>CMD</code> 有两种格式：</p>
+
+<ol>
+<li>Exec 格式：<code>CMD [&quot;executable&quot;,&quot;param1&quot;,&quot;param2&quot;]</code>。这是 <code>CMD</code> 的推荐格式。<code>CMD [&quot;param1&quot;,&quot;param2&quot;]</code> 为 <code>ENTRYPOINT</code> 提供额外的参数，此时 <code>ENTRYPOINT</code> 必须使用 Exec 格式。</li>
+<li>Shell 格式：<code>CMD command param1 param2</code>。Exec 和 Shell 格式前面已经介绍过了。第二种格式 <code>CMD [&quot;param1&quot;,&quot;param2&quot;]</code> 要与 Exec 格式 的 <code>ENTRYPOINT</code> 指令配合使用，其用途是为 <code>ENTRYPOINT</code> <strong>设置默认</strong>的参数。我们将在后面讨论 <code>ENTRYPOINT</code> 时举例说明。</li>
+</ol>
+
+<p>下面看看 <code>CMD</code> 是如何工作的。Dockerfile 片段如下：<code>CMD echo &quot;Hello world&quot;</code>。运行容器 <code>docker run -it [image]</code> 将输出：<code>Hello world</code></p>
+
+<p>但当后面加上一个命令，比如 <code>docker run -it [image] /bin/bash</code>，<code>CMD</code> 会被忽略掉，命令 <code>bash</code> 将被执行：<code>root@10a32dc7d3d3:/#</code></p>
+
+<h1 id="5-entrypoint">5 ENTRYPOINT</h1>
+
+<p><code>ENTRYPOINT</code> 指令可<strong>让容器以应用程序或者服务的形式运行</strong>。</p>
+
+<p><code>ENTRYPOINT</code> 看上去与 <code>CMD</code> 很像，它们都可以指定要执行的命令及其参数。不同的地方在于 <code>ENTRYPOINT</code> <strong>不会被忽略</strong>，一定会被执行，即使运行 <code>docker run</code> 时指定了其他命令。</p>
+
+<p><code>ENTRYPOINT</code> 有两种格式 ：</p>
+
+<ol>
+<li><p>Exec 格式：<code>ENTRYPOINT [&quot;executable&quot;, &quot;param1&quot;, &quot;param2&quot;]</code> 这是 <code>ENTRYPOINT</code> 的<strong>推荐格式</strong>。</p></li>
+
+<li><p>Shell 格式：<code>ENTRYPOINT command param1 param2</code></p></li>
+</ol>
+
+<p>在为 <code>ENTRYPOINT</code> 选择格式时必须小心，因为<strong>这两种格式的效果差别很大</strong>。</p>
+
+<p><code>ENTRYPOINT</code> 的 Exec 格式用于设置要执行的命令及其参数，同时可通过 <code>CMD</code> <strong>提供额外的参数</strong>。<code>ENTRYPOINT</code> 中的参数始终会被使用，而 <code>CMD</code> 的额外参数可以在容器启动时动态替换掉。</p>
+
+<p>比如下面的 Dockerfile 片段：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">ENTRYPOINT [<span style="font-style:italic">&#34;/bin/echo&#34;</span>, <span style="font-style:italic">&#34;Hello&#34;</span>]  
+CMD [<span style="font-style:italic">&#34;world&#34;</span>]</code></pre></div>
+<p>当容器通过 <code>docker run -it [image]</code> 启动时，输出为：<code>Hello world</code>。而如果通过 <code>docker run -it [image] runzhliu</code> 启动，则输出为：<code>Hello runzhliu</code>。<code>ENTRYPOINT</code> 的 Shell 格式会忽略任何 <code>CMD</code> 或 <code>docker run</code> 提供的参数。</p>
+
+<h1 id="6-最佳实践">6 最佳实践</h1>
+
+<p>使用 <code>RUN</code> 指令安装应用和软件包，构建镜像。如果 Docker 镜像的用途是运行应用程序或服务，比如运行一个 MySQL，应该优先使用 Exec 格式的 <code>ENTRYPOINT</code> 指令。<code>CMD</code> 可为 <code>ENTRYPOINT</code> 提供额外的默认参数，同时可利用 <code>docker run</code> 命令行替换默认参数。</p>
+
+<p>如果想为容器设置默认的启动命令，可使用 <code>CMD</code> 指令。用户可在 <code>docker run</code> 命令行中替换此默认命令。</p>
+
+      </div>
+
+      <footer>
+        
+
+
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+      </div>
+
+      <footer class="footer">
+  <section class="container">
+    
+      <p>Once a gunner, always a gunner, COYG!</p>
+    
+     © 2019
+    
+       · 
+      Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+    
+    
+  </section>
+</footer>
+
+    </main>
+
+    
+
+  </body>
+
+</html>
