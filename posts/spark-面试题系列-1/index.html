@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="author" content="Liu Oscar">
+    <meta name="description" content="runzhliu&#39; personal website">
+    <meta name="keywords" content="blog,developer,personal">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Spark 面试题系列-1"/>
+<meta name="twitter:description" content="1 Spark为什么快，Spark SQL 一定比 Hive 快吗  From: https://blog.csdn.net/Stefan_xiepj/article/details/80347720
+ Spark SQL 比 Hadoop Hive 快，是有一定条件的，而且不是 Spark SQL 的引擎比 Hive 的引擎快，相反，Hive 的 HQL 引擎还比 Spark SQL 的引擎更快。其实，关键还是在于 Spark 本身快。
+ 消除了冗余的 HDFS 读写: Hadoop 每次 shuffle 操作后，必须写到磁盘，而 Spark 在 shuffle 后不一定落盘，可以 persist 到内存中，以便迭代时使用。如果操作复杂，很多的 shufle 操作，那么 Hadoop 的读写 IO 时间会大大增加，也是 Hive 更慢的主要原因了。 消除了冗余的 MapReduce 阶段: Hadoop 的 shuffle 操作一定连着完整的 MapReduce 操作，冗余繁琐。而 Spark 基于 RDD 提供了丰富的算子操作，且 reduce 操作产生 shuffle 数据，可以缓存在内存中。 JVM 的优化: Hadoop 每次 MapReduce 操作，启动一个 Task 便会启动一次 JVM，基于进程的操作。而 Spark 每次 MapReduce 操作是基于线程的，只在启动 Executor 是启动一次 JVM，内存的 Task 操作是在线程复用的。每次启动 JVM 的时间可能就需要几秒甚至十几秒，那么当 Task 多了，这个时间 Hadoop 不知道比 Spark 慢了多少。  不过凡事都没有绝对，考虑一种极端查询:"/>
+
+    <meta property="og:title" content="Spark 面试题系列-1" />
+<meta property="og:description" content="1 Spark为什么快，Spark SQL 一定比 Hive 快吗  From: https://blog.csdn.net/Stefan_xiepj/article/details/80347720
+ Spark SQL 比 Hadoop Hive 快，是有一定条件的，而且不是 Spark SQL 的引擎比 Hive 的引擎快，相反，Hive 的 HQL 引擎还比 Spark SQL 的引擎更快。其实，关键还是在于 Spark 本身快。
+ 消除了冗余的 HDFS 读写: Hadoop 每次 shuffle 操作后，必须写到磁盘，而 Spark 在 shuffle 后不一定落盘，可以 persist 到内存中，以便迭代时使用。如果操作复杂，很多的 shufle 操作，那么 Hadoop 的读写 IO 时间会大大增加，也是 Hive 更慢的主要原因了。 消除了冗余的 MapReduce 阶段: Hadoop 的 shuffle 操作一定连着完整的 MapReduce 操作，冗余繁琐。而 Spark 基于 RDD 提供了丰富的算子操作，且 reduce 操作产生 shuffle 数据，可以缓存在内存中。 JVM 的优化: Hadoop 每次 MapReduce 操作，启动一个 Task 便会启动一次 JVM，基于进程的操作。而 Spark 每次 MapReduce 操作是基于线程的，只在启动 Executor 是启动一次 JVM，内存的 Task 操作是在线程复用的。每次启动 JVM 的时间可能就需要几秒甚至十几秒，那么当 Task 多了，这个时间 Hadoop 不知道比 Spark 慢了多少。  不过凡事都没有绝对，考虑一种极端查询:" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://runzhliu.github.io/posts/spark-%E9%9D%A2%E8%AF%95%E9%A2%98%E7%B3%BB%E5%88%97-1/" />
+<meta property="article:published_time" content="2019-07-24T00:00:00&#43;00:00"/>
+<meta property="article:modified_time" content="2019-07-24T00:00:00&#43;00:00"/>
+
+
+    
+      <base href="https://runzhliu.github.io/posts/spark-%E9%9D%A2%E8%AF%95%E9%A2%98%E7%B3%BB%E5%88%97-1/">
+    
+    <title>
+  Spark 面试题系列-1 · runzhliu
+</title>
+
+    
+      <link rel="canonical" href="https://runzhliu.github.io/posts/spark-%E9%9D%A2%E8%AF%95%E9%A2%98%E7%B3%BB%E5%88%97-1/">
+    
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" />
+
+    
+      
+      
+      <link rel="stylesheet" href="https://runzhliu.github.io/css/coder.min.28d751104f30c16da1aa1bb04015cbe662cacfe0d1b01af4f2240ad58580069c.css" integrity="sha256-KNdREE8wwW2hqhuwQBXL5mLKz&#43;DRsBr08iQK1YWABpw=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+
+    
+      <link rel="stylesheet" href="https://runzhliu.github.io/css/custom.css" />
+    
+
+    
+    
+    <link rel="icon" type="image/png" href="https://runzhliu.github.io/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="https://runzhliu.github.io/images/favicon-16x16.png" sizes="16x16">
+
+    <meta name="generator" content="Hugo 0.55.4" />
+  </head>
+
+  <body class=" ">
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="https://runzhliu.github.io/">
+      runzhliu
+    </a>
+    <input type="checkbox" id="menu-toggle" />
+    <label class="menu-button float-right" for="menu-toggle"><i class="fas fa-bars"></i></label>
+    <ul class="navigation-list">
+      
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://runzhliu.github.io/posts/">Blog</a>
+          </li>
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://runzhliu.github.io/about/">About</a>
+          </li>
+        
+      
+      
+    </ul>
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">Spark 面试题系列-1</h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fas fa-calendar"></i>
+              <time datetime='2019-07-24T00:00:00Z'>
+                July 24, 2019
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fas fa-clock"></i>
+              3 minutes read
+            </span>
+          </div>
+          
+          
+        </div>
+      </header>
+
+      <div>
+        
+
+<hr />
+
+<h1 id="1-spark为什么快-spark-sql-一定比-hive-快吗">1 Spark为什么快，Spark SQL 一定比 Hive 快吗</h1>
+
+<blockquote>
+<p>From: <a href="https://blog.csdn.net/Stefan_xiepj/article/details/80347720">https://blog.csdn.net/Stefan_xiepj/article/details/80347720</a></p>
+</blockquote>
+
+<p>Spark SQL 比 Hadoop Hive 快，是有一定条件的，而且不是 Spark SQL 的引擎比 Hive 的引擎快，相反，Hive 的 HQL 引擎还比 Spark SQL 的引擎更快。其实，关键还是在于 Spark 本身快。</p>
+
+<ol>
+<li>消除了冗余的 HDFS 读写: Hadoop 每次 shuffle 操作后，必须写到磁盘，而 Spark 在 shuffle 后不一定落盘，可以 persist 到内存中，以便迭代时使用。如果操作复杂，很多的 shufle 操作，那么 Hadoop 的读写 IO 时间会大大增加，也是 Hive 更慢的主要原因了。</li>
+<li>消除了冗余的 MapReduce 阶段: Hadoop 的 shuffle 操作一定连着完整的 MapReduce 操作，冗余繁琐。而 Spark 基于 RDD 提供了丰富的算子操作，且 reduce 操作产生 shuffle 数据，可以缓存在内存中。</li>
+<li>JVM 的优化: Hadoop 每次 MapReduce 操作，启动一个 Task 便会启动一次 JVM，基于进程的操作。而 Spark 每次 MapReduce 操作是基于线程的，只在启动 Executor 是启动一次 JVM，内存的 Task 操作是在<strong>线程复用</strong>的。每次启动 JVM 的时间可能就需要几秒甚至十几秒，那么当 Task 多了，这个时间 Hadoop 不知道比 Spark 慢了多少。</li>
+</ol>
+
+<p>不过凡事都没有绝对，考虑一种极端查询:</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="font-weight:bold">select</span> month_id, <span style="font-weight:bold">sum</span>(sales) <span style="font-weight:bold">from</span> T <span style="font-weight:bold">group</span> <span style="font-weight:bold">by</span> month_id;</code></pre></div>
+<p>这个查询只有一次 shuffle 操作，此时，也许 Hive HQL 的运行时间也许比 Spark 还快，<strong>反正 shuffle 完了都会落一次盘，或者都不落盘</strong>。</p>
+
+<p><strong>结论</strong>
+Spark 快不是绝对的，但是绝大多数，Spark 都比 Hadoop 计算要快。这主要得益于其对 mapreduce 操作的优化以及对 JVM 使用的优化。</p>
+
+<h1 id="2-rdd-dag-stage-task-和-job-怎么理解">2 RDD, DAG, Stage, Task 和 Job 怎么理解？</h1>
+
+<p><strong>RDD</strong>
+RDD 是 Spark 的灵魂，也称为<strong>弹性分布式数据集</strong>。一个 RDD 代表一个可以被分区的只读数据集。RDD 内部可以有许多分区(partitions)，每个分区又拥有大量的记录(records)。</p>
+
+<p><strong>DAG</strong>
+Spark 中<strong>使用 DAG 对 RDD 的关系进行建模</strong>，描述了 RDD 的依赖关系，这种关系也被称之为 lineage（血缘），RDD 的依赖关系使用 Dependency 维护。</p>
+
+<p><strong>Stage</strong>
+在 DAG 中又进行 Stage 的划分，划分的依据是依赖是否是 shuffle 的，每个 Stage 又可以划分成若干 Task。接下来的事情就是 Driver 发送 Task 到 Executor，Executor 线程池去执行这些 task，完成之后将结果返回给 Driver。</p>
+
+<p><strong>Job</strong>
+Spark 的 Job 来源于用户执行 action 操作（这是 Spark 中实际意义的 Job），就是从 RDD 中获取结果的操作，而不是将一个 RDD 转换成另一个 RDD 的 transformation 操作。</p>
+
+<p><strong>Task</strong>
+一个 Stage 内，最终的 RDD 有多少个 partition，就会产生多少个 task。</p>
+
+<h1 id="3-宽依赖-窄依赖怎么理解">3 宽依赖、窄依赖怎么理解？</h1>
+
+<ol>
+<li>窄依赖指的是每一个 Parent RDD 的 Partition 最多被子 RDD 的一个 Partition 使用（一子一亲）</li>
+<li>宽依赖指的是多个子 RDD 的 Partition 会依赖同一个 parent RDD的 partition（多子一亲）</li>
+</ol>
+
+<p>RDD 作为数据结构，本质上是一个<strong>只读的分区记录集合</strong>。一个 RDD 可以包含多个分区，每个分区就是一个数据集片段。</p>
+
+<p>首先，窄依赖可以支持在<strong>同一个节点</strong>上，以 pipeline 形式执行多条命令（也叫同一个 Stage 的操作），例如在执行了 map 后，紧接着执行 filter。相反，宽依赖需要所有的父分区都是可用的，可能还需要调用类似 MapReduce 之类的操作进行<strong>跨节点传递</strong>。</p>
+
+<p>其次，则是从失败恢复的角度考虑。窄依赖的失败恢复更有效，因为它只需要重新计算丢失的 parent partition 即可，而且可以并行地在不同节点进行重计算（一台机器太慢就会重新调度到多个节点进行）。</p>
+
+<h1 id="4-spark-作业提交流程是怎么样的">4 Spark 作业提交流程是怎么样的</h1>
+
+<ol>
+<li>spark-submit 提交代码，执行 <code>new SparkContext()</code>，在 SparkContext 里构造 DAGScheduler 和 TaskScheduler。</li>
+<li>TaskScheduler 会通过后台的一个进程，连接 Master，向 Master 注册 Application。</li>
+<li>Master 接收到 Application 请求后，会使用相应的<strong>资源调度算法</strong>，在 Worker 上为这个 Application 启动多个 Executor</li>
+<li>Executor 启动后，会自己反向注册到 TaskScheduler 中。所有 Executor 都注册到 Driver 上之后，SparkContext <strong>结束初始化</strong>，接下来往下执行我们自己的代码。</li>
+<li>每执行到一个 Action，就会创建一个 Job。Job 会提交给 DAGScheduler。</li>
+<li>DAGScheduler 会将 Job 划分为多个 Stage，然后每个 Stage 创建一个 TaskSet。</li>
+<li>TaskScheduler 会把每一个 TaskSet 里的 Task，提交到 Executor 上执行。</li>
+<li>Executor 上有线程池，每接收到一个 Task，就用 TaskRunner 封装，然后从线程池里取出一个线程执行这个 task。(TaskRunner 将我们编写的代码，拷贝，反序列化，执行 Task，每个 Task 执行 RDD 里的一个 partition)</li>
+</ol>
+
+<h1 id="5-为什么要用-yarn-来部署-spark">5 为什么要用 Yarn 来部署 Spark?</h1>
+
+<p>因为 Yarn 支持<strong>动态资源配置</strong>。Standalone 模式只支持简单的固定资源分配策略，每个任务固定数量的 core，各 Job 按顺序依次分配在资源，资源不够的时候就排队。</p>
+
+<p>这种模式比较适合单用户的情况，多用户的情境下，会有可能有些用户的任务得不到资源。</p>
+
+<p>Yarn 作为通用的资源调度平台，除了 Spark 提供调度服务之外，还可以为其他系统提供调度，如 Hadoop MapReduce, Hive 等。</p>
+
+<h1 id="6-简单说说-spark-支持的4种集群管理器">6 简单说说 Spark 支持的4种集群管理器</h1>
+
+<ol>
+<li>Standalone 模式: 资源管理器是 Master 节点，调度策略相对单一，只支持先进先出模式，固定任务资源。</li>
+<li>Hadoop Yarn 模式: 资源管理器是 Yarn 集群，主要用来管理资源。Yarn 支持动态资源的管理，还可以调度其他实现了 Yarn 调度接口的集群计算，非常适用于多个集群同时部署的场景，是目前最流行的一种资源管理系统。</li>
+<li>Apache Mesos: Mesos 是专门用于分布式系统资源管理的开源系统，可以对集群中的资源做弹性管理。</li>
+<li>Kubernetes: K8S 是自 Apache Spark 2.3.0 引入的集群管理器，Docker 作为基本的 Runtime 方式。</li>
+</ol>
+
+<p>目前来说 Spark 的 Cluster Mode，Yarn 还是主流，K8S 则迎头赶上。</p>
+
+<h1 id="7-说说-worker-和-executor-的区别">7 说说 Worker 和 Executor 的区别</h1>
+
+<p>Worker 是指每个工作节点，启动的一个进程，负责管理本节点，jps 可以看到 Worker 进程在运行，对应的概念是 Master 节点。
+Executor 每个 Spark 程序在每个节点上启动的一个进程，专属于一个 Spark 程序，与 Spark 程序有相同的生命周期，负责 Spark 在节点上启动的 Task，管理内存和磁盘。如果一个节点上有多个 Spark 程序，那么相应就会启动多个执行器。所以说一个 Worker 节点可以有多个 Executor 进程。</p>
+
+<h1 id="8-说说-spark-local-和-standalone-有什么区别">8 说说 Spark Local 和 Standalone 有什么区别</h1>
+
+<p>Spark一共有6种运行模式：Local，Standalone，Yarn-Cluster，Yarn-Client, Mesos, Kubernetes</p>
+
+<ol>
+<li>Local: Local 模式即单机模式，如果在命令语句中不加任何配置，则默认是 Local 模式，在本地运行。这也是部署、设置最简单的一种模式，所有的 Spark 进程都运行在一台机器或一个虚拟机上面。</li>
+<li>Standalone: Standalone 是 Spark 自身实现的资源调度框架。如果我们只使用 Spark 进行大数据计算，不使用其他的计算框架时，就采用 Standalone 模式就够了，尤其是单用户的情况下。Standalone 模式是 Spark 实现的资源调度框架，其主要的节点有 Client 节点、Master 节点和 Worker 节点。其中 Driver 既可以运行在 Master 节点上中，也可以运行在本地 Client 端。当用 spark-shell 交互式工具提交 Spark 的 Job 时，Driver 在 Master 节点上运行；当使用 spark-submit 工具提交 Job 或者在 Eclipse、IDEA 等开发平台上使用 <code>new SparkConf.setManager(“spark://master:7077”)</code> 方式运行 Spark 任务时，Driver 是运行在本地 Client 端上的。</li>
+</ol>
+
+<p>Standalone 模式的部署比较繁琐，不过官方有提供部署脚本，需要把 Spark 的部署包安装到每一台节点机器上，并且部署的目录也必须相同，而且需要 Master 节点和其他节点实现 SSH 无密码登录。启动时，需要先启动 Spark 的 Master 和 Slave 节点。提交命令类似于:</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">./bin/spark-submit <span style="font-weight:bold;font-style:italic">\
+</span><span style="font-weight:bold;font-style:italic"></span>  --class org.apache.spark.examples.SparkPi <span style="font-weight:bold;font-style:italic">\
+</span><span style="font-weight:bold;font-style:italic"></span>  --master spark://Oscar-2.local:7077 <span style="font-weight:bold;font-style:italic">\
+</span><span style="font-weight:bold;font-style:italic"></span>  /tmp/spark-2.2.0-bin-hadoop2.7/examples/jars/spark-examples_2.11-2.2.0.jar <span style="font-weight:bold;font-style:italic">\
+</span><span style="font-weight:bold;font-style:italic"></span>  100</code></pre></div>
+<p>其中 master:7077是 Spark 的 Master 节点的主机名和端口号，当然集群是需要提前启动。</p>
+
+<h1 id="9-spark-经常说的-repartition-有什么作用">9 Spark 经常说的 Repartition 有什么作用</h1>
+
+<p>一般上来说有多少个 Partition，就有多少个 Task，Repartition 的理解其实很简单，就是把原来 RDD 的分区重新安排。这样做有什么好坏呢？</p>
+
+<ol>
+<li>避免小文件</li>
+<li>减少 Task 个数</li>
+<li>但是会增加每个 Task 处理的数据量，Task 运行时间可能会增加</li>
+</ol>
+
+<h1 id="10-简单写一个-wordcount-程序">10 简单写一个 WordCount 程序</h1>
+
+<p>我面试中，就曾经被面试官要求过手写一段 WordCount，别看好像很简单，实际上如果常年在做 Spark 内核的开发，而不是业务开发，也许你就想不起来了。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sc.textFile(<span style="font-style:italic">&#34;/path/to/spark/README.md&#34;</span>)
+  .flatMap(_.split(<span style="font-style:italic">&#34; &#34;</span>))
+  .map(x =&gt; (x, 1))
+  .reduceByKey(_ + _)
+  .map(x =&gt; (x._2, x._1))
+  .sortByKey(false)
+  .map(x =&gt; (x._2, x._1))
+  .take(10)
+  
+<span style="font-style:italic"># 结果</span>
+Array[(String, Int)] = Array((<span style="font-style:italic">&#34;&#34;</span>,71), (the,24), (to,17), (Spark,16), (<span style="font-weight:bold">for</span>,12), (<span style="font-style:italic">##,9), (and,9), (a,8), (can,7), (run,7))</span></code></pre></div>
+      </div>
+
+      <footer>
+        
+
+
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+      </div>
+
+      <footer class="footer">
+  <section class="container">
+    
+      <p>Once a gunner, always a gunner, COYG!</p>
+    
+     © 2019
+    
+       · 
+      Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+    
+    
+  </section>
+</footer>
+
+    </main>
+
+    
+
+  </body>
+
+</html>
