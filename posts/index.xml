@@ -18,7 +18,7 @@
       
       <guid>https://runzhliu.github.io/posts/spark-%E9%9D%A2%E8%AF%95%E9%A2%98%E7%B3%BB%E5%88%97/</guid>
       <description>之前在知乎上整理过一些 Spark 常问的面试题，知识有点老旧了，而且当时没有太注重排版，计划从这篇开始，逐渐将原来的面试题文档给取代掉，预计每篇大概整理10条问题，对 Spark 一些基础知识点，尤其是面试的时候会碰到的问题，来一个总结。
-总结的顺序可能是无序的，也就是说，不一定是由浅入深，但是应该是比较「口水化」的问答模式。</description>
+总结的顺序可能是无序的，也就是说，不一定是由浅入深，但是应该是比较「口水化」的问答模式，适合对 Spark 还不是相当熟悉的读者。</description>
     </item>
     
     <item>
@@ -27,8 +27,7 @@
       <pubDate>Wed, 24 Jul 2019 00:00:00 +0000</pubDate>
       
       <guid>https://runzhliu.github.io/posts/spark-%E9%9D%A2%E8%AF%95%E9%A2%98%E7%B3%BB%E5%88%97-1/</guid>
-      <description>1 Spark为什么快，Spark SQL 一定比 Hive 快吗  From: https://blog.csdn.net/Stefan_xiepj/article/details/80347720
- Spark SQL 比 Hadoop Hive 快，是有一定条件的，而且不是 Spark SQL 的引擎比 Hive 的引擎快，相反，Hive 的 HQL 引擎还比 Spark SQL 的引擎更快。其实，关键还是在于 Spark 本身快。
+      <description>1 Spark为什么快，Spark SQL 一定比 Hive 快吗 Spark SQL 比 Hadoop Hive 快，是有一定条件的，而且不是 Spark SQL 的引擎比 Hive 的引擎快，相反，Hive 的 HQL 引擎还比 Spark SQL 的引擎更快。其实，关键还是在于 Spark 本身快。
  消除了冗余的 HDFS 读写: Hadoop 每次 shuffle 操作后，必须写到磁盘，而 Spark 在 shuffle 后不一定落盘，可以 persist 到内存中，以便迭代时使用。如果操作复杂，很多的 shufle 操作，那么 Hadoop 的读写 IO 时间会大大增加，也是 Hive 更慢的主要原因了。 消除了冗余的 MapReduce 阶段: Hadoop 的 shuffle 操作一定连着完整的 MapReduce 操作，冗余繁琐。而 Spark 基于 RDD 提供了丰富的算子操作，且 reduce 操作产生 shuffle 数据，可以缓存在内存中。 JVM 的优化: Hadoop 每次 MapReduce 操作，启动一个 Task 便会启动一次 JVM，基于进程的操作。而 Spark 每次 MapReduce 操作是基于线程的，只在启动 Executor 是启动一次 JVM，内存的 Task 操作是在线程复用的。每次启动 JVM 的时间可能就需要几秒甚至十几秒，那么当 Task 多了，这个时间 Hadoop 不知道比 Spark 慢了多少。  不过凡事都没有绝对，考虑一种极端查询:</description>
     </item>
     

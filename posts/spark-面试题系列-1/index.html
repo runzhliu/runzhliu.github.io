@@ -11,13 +11,11 @@
 
     <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Spark 面试题系列-1"/>
-<meta name="twitter:description" content="1 Spark为什么快，Spark SQL 一定比 Hive 快吗  From: https://blog.csdn.net/Stefan_xiepj/article/details/80347720
- Spark SQL 比 Hadoop Hive 快，是有一定条件的，而且不是 Spark SQL 的引擎比 Hive 的引擎快，相反，Hive 的 HQL 引擎还比 Spark SQL 的引擎更快。其实，关键还是在于 Spark 本身快。
+<meta name="twitter:description" content="1 Spark为什么快，Spark SQL 一定比 Hive 快吗 Spark SQL 比 Hadoop Hive 快，是有一定条件的，而且不是 Spark SQL 的引擎比 Hive 的引擎快，相反，Hive 的 HQL 引擎还比 Spark SQL 的引擎更快。其实，关键还是在于 Spark 本身快。
  消除了冗余的 HDFS 读写: Hadoop 每次 shuffle 操作后，必须写到磁盘，而 Spark 在 shuffle 后不一定落盘，可以 persist 到内存中，以便迭代时使用。如果操作复杂，很多的 shufle 操作，那么 Hadoop 的读写 IO 时间会大大增加，也是 Hive 更慢的主要原因了。 消除了冗余的 MapReduce 阶段: Hadoop 的 shuffle 操作一定连着完整的 MapReduce 操作，冗余繁琐。而 Spark 基于 RDD 提供了丰富的算子操作，且 reduce 操作产生 shuffle 数据，可以缓存在内存中。 JVM 的优化: Hadoop 每次 MapReduce 操作，启动一个 Task 便会启动一次 JVM，基于进程的操作。而 Spark 每次 MapReduce 操作是基于线程的，只在启动 Executor 是启动一次 JVM，内存的 Task 操作是在线程复用的。每次启动 JVM 的时间可能就需要几秒甚至十几秒，那么当 Task 多了，这个时间 Hadoop 不知道比 Spark 慢了多少。  不过凡事都没有绝对，考虑一种极端查询:"/>
 
     <meta property="og:title" content="Spark 面试题系列-1" />
-<meta property="og:description" content="1 Spark为什么快，Spark SQL 一定比 Hive 快吗  From: https://blog.csdn.net/Stefan_xiepj/article/details/80347720
- Spark SQL 比 Hadoop Hive 快，是有一定条件的，而且不是 Spark SQL 的引擎比 Hive 的引擎快，相反，Hive 的 HQL 引擎还比 Spark SQL 的引擎更快。其实，关键还是在于 Spark 本身快。
+<meta property="og:description" content="1 Spark为什么快，Spark SQL 一定比 Hive 快吗 Spark SQL 比 Hadoop Hive 快，是有一定条件的，而且不是 Spark SQL 的引擎比 Hive 的引擎快，相反，Hive 的 HQL 引擎还比 Spark SQL 的引擎更快。其实，关键还是在于 Spark 本身快。
  消除了冗余的 HDFS 读写: Hadoop 每次 shuffle 操作后，必须写到磁盘，而 Spark 在 shuffle 后不一定落盘，可以 persist 到内存中，以便迭代时使用。如果操作复杂，很多的 shufle 操作，那么 Hadoop 的读写 IO 时间会大大增加，也是 Hive 更慢的主要原因了。 消除了冗余的 MapReduce 阶段: Hadoop 的 shuffle 操作一定连着完整的 MapReduce 操作，冗余繁琐。而 Spark 基于 RDD 提供了丰富的算子操作，且 reduce 操作产生 shuffle 数据，可以缓存在内存中。 JVM 的优化: Hadoop 每次 MapReduce 操作，启动一个 Task 便会启动一次 JVM，基于进程的操作。而 Spark 每次 MapReduce 操作是基于线程的，只在启动 Executor 是启动一次 JVM，内存的 Task 操作是在线程复用的。每次启动 JVM 的时间可能就需要几秒甚至十几秒，那么当 Task 多了，这个时间 Hadoop 不知道比 Spark 慢了多少。  不过凡事都没有绝对，考虑一种极端查询:" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://runzhliu.github.io/posts/spark-%E9%9D%A2%E8%AF%95%E9%A2%98%E7%B3%BB%E5%88%97-1/" />
@@ -121,10 +119,6 @@
 <hr />
 
 <h1 id="1-spark为什么快-spark-sql-一定比-hive-快吗">1 Spark为什么快，Spark SQL 一定比 Hive 快吗</h1>
-
-<blockquote>
-<p>From: <a href="https://blog.csdn.net/Stefan_xiepj/article/details/80347720">https://blog.csdn.net/Stefan_xiepj/article/details/80347720</a></p>
-</blockquote>
 
 <p>Spark SQL 比 Hadoop Hive 快，是有一定条件的，而且不是 Spark SQL 的引擎比 Hive 的引擎快，相反，Hive 的 HQL 引擎还比 Spark SQL 的引擎更快。其实，关键还是在于 Spark 本身快。</p>
 
@@ -238,8 +232,8 @@ Executor 每个 Spark 程序在每个节点上启动的一个进程，专属于�
 <h1 id="10-简单写一个-wordcount-程序">10 简单写一个 WordCount 程序</h1>
 
 <p>我面试中，就曾经被面试官要求过手写一段 WordCount，别看好像很简单，实际上如果常年在做 Spark 内核的开发，而不是业务开发，也许你就想不起来了。</p>
-<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sc.textFile(<span style="font-style:italic">&#34;/path/to/spark/README.md&#34;</span>)
-  .flatMap(_.split(<span style="font-style:italic">&#34; &#34;</span>))
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4">sc.textFile(&#34;/path/to/spark/README.md&#34;)
+  .flatMap(_.split(&#34; &#34;))
   .map(x =&gt; (x, 1))
   .reduceByKey(_ + _)
   .map(x =&gt; (x._2, x._1))
@@ -247,8 +241,8 @@ Executor 每个 Spark 程序在每个节点上启动的一个进程，专属于�
   .map(x =&gt; (x._2, x._1))
   .take(10)
   
-<span style="font-style:italic"># 结果</span>
-Array[(String, Int)] = Array((<span style="font-style:italic">&#34;&#34;</span>,71), (the,24), (to,17), (Spark,16), (<span style="font-weight:bold">for</span>,12), (<span style="font-style:italic">##,9), (and,9), (a,8), (can,7), (run,7))</span></code></pre></div>
+# 结果
+Array[(String, Int)] = Array((&#34;&#34;,71), (the,24), (to,17), (Spark,16), (for,12), (##,9), (and,9), (a,8), (can,7), (run,7))</pre></div>
       </div>
 
       <footer>
