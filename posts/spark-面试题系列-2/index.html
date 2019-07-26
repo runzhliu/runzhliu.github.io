@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="author" content="Liu Oscar">
+    <meta name="description" content="runzhliu&#39; personal website">
+    <meta name="keywords" content="blog,developer,personal">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Spark 面试题系列-2"/>
+<meta name="twitter:description" content="1 RDD 如何通过记录更新的方式容错 RDD 实现分布式数据集容错方法有两种:
+ 数据检查点 记录更新  RDD 采用记录更新的方式：记录所有更新点的成本很高。 所以，RDD只支持粗颗粒变换，即只记录单个块（分区 partition）上执行的单个操作，然后创建某个 RDD 的变换序列（血统 lineage）存储下来； 变换序列指，每个 RDD 都包含了它是如何由其他 RDD 变换过来的以及如何重建某一块数据的信息。因此 RDD 的容错机制又称“血统”容错。
+2 Spark 优越性 Spark 的几个优势  更高的性能。因为数据被加载到集群主机的分布式内存中。数据可以被快速的转换迭代，并缓存用以后续的频繁访问需求。在数据全部加载到内存的情况下，Spark 可以比 Hadoop 快100倍，在内存不够存放所有数据的情况下快 Hadoop 10倍。 通过建立在 Java, Scala, Python, SQL（应对交互式查询）的标准API以方便各行各业使用，同时还含有大量开箱即用的机器学习库。 与现有 Hadoop 1和2.x(YARN)生态兼容，因此机构可以无缝迁移，目前也在做 Yarn 3 的支持。 方便下载和安装。方便的 shell（REPL: Read-Eval-Print-Loop）可以对 API 进行交互式的学习。 借助高等级的架构提高生产力，从而可以讲精力放到计算上。  MapReduce 与 Spark 相比，有哪些异同点  基本原理上 1.1 MapReduce: 基于磁盘的大数据批量处理系统 1.2 Spark: 基于 RDD (弹性分布式数据集)数据处理，显示将 RDD 数据存储到磁盘和内存中。 模型上 2."/>
+
+    <meta property="og:title" content="Spark 面试题系列-2" />
+<meta property="og:description" content="1 RDD 如何通过记录更新的方式容错 RDD 实现分布式数据集容错方法有两种:
+ 数据检查点 记录更新  RDD 采用记录更新的方式：记录所有更新点的成本很高。 所以，RDD只支持粗颗粒变换，即只记录单个块（分区 partition）上执行的单个操作，然后创建某个 RDD 的变换序列（血统 lineage）存储下来； 变换序列指，每个 RDD 都包含了它是如何由其他 RDD 变换过来的以及如何重建某一块数据的信息。因此 RDD 的容错机制又称“血统”容错。
+2 Spark 优越性 Spark 的几个优势  更高的性能。因为数据被加载到集群主机的分布式内存中。数据可以被快速的转换迭代，并缓存用以后续的频繁访问需求。在数据全部加载到内存的情况下，Spark 可以比 Hadoop 快100倍，在内存不够存放所有数据的情况下快 Hadoop 10倍。 通过建立在 Java, Scala, Python, SQL（应对交互式查询）的标准API以方便各行各业使用，同时还含有大量开箱即用的机器学习库。 与现有 Hadoop 1和2.x(YARN)生态兼容，因此机构可以无缝迁移，目前也在做 Yarn 3 的支持。 方便下载和安装。方便的 shell（REPL: Read-Eval-Print-Loop）可以对 API 进行交互式的学习。 借助高等级的架构提高生产力，从而可以讲精力放到计算上。  MapReduce 与 Spark 相比，有哪些异同点  基本原理上 1.1 MapReduce: 基于磁盘的大数据批量处理系统 1.2 Spark: 基于 RDD (弹性分布式数据集)数据处理，显示将 RDD 数据存储到磁盘和内存中。 模型上 2." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://runzhliu.github.io/posts/spark-%E9%9D%A2%E8%AF%95%E9%A2%98%E7%B3%BB%E5%88%97-2/" />
+<meta property="article:published_time" content="2019-07-26T00:00:00&#43;00:00"/>
+<meta property="article:modified_time" content="2019-07-26T00:00:00&#43;00:00"/>
+
+
+    
+      <base href="https://runzhliu.github.io/posts/spark-%E9%9D%A2%E8%AF%95%E9%A2%98%E7%B3%BB%E5%88%97-2/">
+    
+    <title>
+  Spark 面试题系列-2 · runzhliu
+</title>
+
+    
+      <link rel="canonical" href="https://runzhliu.github.io/posts/spark-%E9%9D%A2%E8%AF%95%E9%A2%98%E7%B3%BB%E5%88%97-2/">
+    
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700%7CMerriweather:300,700%7CSource+Code+Pro:400,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" />
+
+    
+      
+      
+      <link rel="stylesheet" href="https://runzhliu.github.io/css/coder.min.28d751104f30c16da1aa1bb04015cbe662cacfe0d1b01af4f2240ad58580069c.css" integrity="sha256-KNdREE8wwW2hqhuwQBXL5mLKz&#43;DRsBr08iQK1YWABpw=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+
+    
+      <link rel="stylesheet" href="https://runzhliu.github.io/css/custom.css" />
+    
+
+    
+    
+    <link rel="icon" type="image/png" href="https://runzhliu.github.io/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="https://runzhliu.github.io/images/favicon-16x16.png" sizes="16x16">
+
+    <meta name="generator" content="Hugo 0.55.4" />
+  </head>
+
+  <body class=" ">
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="https://runzhliu.github.io/">
+      runzhliu
+    </a>
+    <input type="checkbox" id="menu-toggle" />
+    <label class="menu-button float-right" for="menu-toggle"><i class="fas fa-bars"></i></label>
+    <ul class="navigation-list">
+      
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://runzhliu.github.io/posts/">Blog</a>
+          </li>
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://runzhliu.github.io/about/">About</a>
+          </li>
+        
+      
+      
+    </ul>
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">Spark 面试题系列-2</h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fas fa-calendar"></i>
+              <time datetime='2019-07-26T00:00:00Z'>
+                July 26, 2019
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fas fa-clock"></i>
+              3 minutes read
+            </span>
+          </div>
+          
+          
+        </div>
+      </header>
+
+      <div>
+        
+
+<hr />
+
+<h1 id="1-rdd-如何通过记录更新的方式容错">1 RDD 如何通过记录更新的方式容错</h1>
+
+<p>RDD 实现分布式数据集容错方法有两种:</p>
+
+<ol>
+<li>数据检查点</li>
+<li>记录更新</li>
+</ol>
+
+<p>RDD 采用记录更新的方式：<strong>记录所有更新点</strong>的成本很高。
+所以，RDD只支持粗颗粒变换，即只记录<strong>单个块（分区 partition）</strong>上执行的<strong>单个操作</strong>，然后创建某个 RDD 的变换序列（血统 lineage）存储下来；
+变换序列指，每个 RDD 都包含了它是如何由其他 RDD 变换过来的以及如何重建某一块数据的信息。因此 RDD 的容错机制又称“血统”容错。</p>
+
+<h1 id="2-spark-优越性">2 Spark 优越性</h1>
+
+<h3 id="spark-的几个优势">Spark 的几个优势</h3>
+
+<ol>
+<li>更高的性能。因为数据被加载到集群主机的<strong>分布式内存</strong>中。数据可以被快速的转换迭代，并缓存用以后续的频繁访问需求。在数据全部加载到内存的情况下，Spark 可以比 Hadoop 快100倍，在内存不够存放所有数据的情况下快 Hadoop 10倍。</li>
+<li>通过建立在 Java, Scala, Python, SQL（应对交互式查询）的标准API以方便各行各业使用，同时还含有大量开箱即用的机器学习库。</li>
+<li>与现有 Hadoop 1和2.x(YARN)生态兼容，因此机构可以无缝迁移，目前也在做 Yarn 3 的支持。</li>
+<li>方便下载和安装。方便的 shell（REPL: Read-Eval-Print-Loop）可以对 API 进行交互式的学习。</li>
+<li>借助高等级的架构提高生产力，从而可以讲精力放到计算上。</li>
+</ol>
+
+<h3 id="mapreduce-与-spark-相比-有哪些异同点">MapReduce 与 Spark 相比，有哪些异同点</h3>
+
+<ol>
+<li>基本原理上
+1.1 MapReduce: 基于磁盘的<strong>大数据批量处理系统</strong>
+1.2 Spark: 基于 RDD (弹性分布式数据集)数据处理，显示将 RDD 数据存储到磁盘和内存中。</li>
+<li>模型上
+2.1 MapReduce 可以处理超大规模的数据，适合日志分析挖掘等较少的迭代的长任务需求，结合了数据的分布式的计算。
+2.2 Spark 适合数据的挖掘，机器学习等多轮迭代式计算任务。</li>
+</ol>
+
+<p>在 Spark 中，一个应用程序包含多个 Job 任务，在 MapReduce 中，一个 Job 任务就是一个应用。</p>
+
+<h1 id="3-transformation-和-action-是什么-区别-举几个常用方法">3 Transformation 和 action 是什么？区别？举几个常用方法</h1>
+
+<p>RDD 创建后就可以在 RDD 上进行数据处理。RDD 支持两种操作:</p>
+
+<ol>
+<li>转换（transformation）: 即从现有的数据集创建一个新的数据集</li>
+<li>动作（action）: 即在数据集上进行计算后，返回一个值给 Driver 程序</li>
+</ol>
+
+<p>RDD 的转化操作 Transformation 是返回一个新的 RDD 的操作，比如 map() 和 filter() ，而行动操作则是向驱动器程序 Driver 返回结果或把结果写入外部系统的操作，会触发实际的计算，比如 count() 和 first() 。Spark 对待转化操作和行动操作的方式很不一样，因此理解你正在进行的操作的类型是很重要的。如果对于一个特定的函数是属于转化操作还是行动操作感到困惑，你可以看看它的返回值类型：转化操作返回的是 RDD，而行动操作返回的是其他的数据类型。</p>
+
+<p>RDD 中所有的 Transformation 都是惰性的，也就是说，它们并不会直接计算结果。相反的它们只是记住了这些应用到基础数据集（例如一个文件）上的转换动作。只有当发生一个要求返回结果给 Driver 的 Action 时，这些 Transformation 才会真正运行。</p>
+
+<h1 id="4-rdd-容错方式">4 RDD 容错方式</h1>
+
+<p>Spark 选择<strong>记录更新</strong>的方式。但是，如果更新粒度太细太多，那么记录更新成本也不低。因此，RDD只支持<strong>粗粒度</strong>转换，即<strong>只记录单个块上执行的单个操作</strong>，然后将创建 RDD 的一系列变换序列（每个 RDD 都包含了他是如何由其他 RDD 变换过来的以及如何重建某一块数据的信息。因此 RDD 的容错机制又称血统容错）记录下来，以便恢复丢失的分区。lineage 本质上很类似于数据库中的重做日志（Redo Log），只不过这个重做日志<strong>粒度很大</strong>，是对全局数据做同样的重做进而恢复数据（所以也称为粗粒度）。</p>
+
+<h1 id="5-可以解释一下这两段程序的异同吗">5 可以解释一下这两段程序的异同吗</h1>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-scala" data-lang="scala"><span style="font-weight:bold">#</span> 1 
+<span style="font-weight:bold">val</span> counter <span style="font-weight:bold">=</span> 0
+<span style="font-weight:bold">val</span> data <span style="font-weight:bold">=</span> <span style="font-weight:bold">Seq</span>(1, 2, 3)
+data.foreach(x <span style="font-weight:bold">=&gt;</span> counter += x)
+println(<span style="font-style:italic">&#34;Counter value: &#34;</span> + counter)
+
+<span style="font-weight:bold">#</span> 2
+<span style="font-weight:bold">val</span> counter <span style="font-weight:bold">=</span> 0
+<span style="font-weight:bold">val</span> data <span style="font-weight:bold">=</span> <span style="font-weight:bold">Seq</span>(1, 2, 3)
+<span style="font-weight:bold">var</span> rdd <span style="font-weight:bold">=</span> sc.parallelizze(data)
+rdd.foreach(x <span style="font-weight:bold">=&gt;</span> counter += x)
+println(<span style="font-style:italic">&#34;Counter value: &#34;</span> + counter)</code></pre></div>
+<p>所有在 Driver 程序追踪的代码看上去好像在 Driver 上计算，实际上都不在本地，每个 RDD 操作都被转换成 Job 分发至集群的执行器 Executor 进程中运行，即便是单机本地运行模式，也是在单独的执行器进程上运行，<strong>与 Driver 进程属于不用的进程</strong>。所以每个 Job 的执行，都会经历<strong>序列化、网络传输、反序列化和运行的过程</strong>。</p>
+
+<p>再具体一点解释是 <code>foreach</code> 中的匿名函数 <code>x =&gt; counter += x</code> 首先会被序列化然后被传入计算节点，反序列化之后再运行，因为 <code>foreach</code> 是 Action 操作，结果会返回到 Driver 进程中。</p>
+
+<p>在序列化的时候，Spark 会将 Job 运行所依赖的<strong>变量、方法</strong>全部打包在一起序列化，相当于它们的副本，所以 counter 会一起被序列化，然后传输到计算节点，是计算节点上的 counter 会自增，而 Driver 程序追踪的 counter 则不会发生变化。执行完成之后，结果会返回到 Driver 程序中。而 Driver 中的 counter 依然是当初的那个 Driver 的值为0。</p>
+
+<h1 id="6-说说-map-和-mappartitions-的区别">6 说说 map 和 mapPartitions 的区别</h1>
+
+<p><code>map</code> 中的 func 作用的是 RDD 中<strong>每一个元素</strong>，而 mapPartitioons 中的 func 作用的对象是 RDD 的<strong>一整个分区</strong>。所以 func 的类型是 <code>Iterator&lt;T&gt; =&gt; Iterator&lt;T&gt;</code>，其中 <code>T</code> 是输入 RDD 的元素类型。</p>
+
+<p>这些可以用 API 中看到。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-scala" data-lang="scala"><span style="font-style:italic">/**
+</span><span style="font-style:italic"> * Return a new RDD by applying a function to all elements of this RDD.
+</span><span style="font-style:italic"> */</span>
+<span style="font-weight:bold">def</span> map[<span style="">U:</span> <span style="">ClassTag</span>](f<span style="font-weight:bold">:</span> <span style="">T</span> =&gt; U)<span style="font-weight:bold">:</span> <span style="">RDD</span>[<span style="">U</span>] <span style="font-weight:bold">=</span> withScope {
+  <span style="font-weight:bold">val</span> cleanF <span style="font-weight:bold">=</span> sc.clean(f)
+  <span style="font-weight:bold">new</span> <span style="font-weight:bold">MapPartitionsRDD</span>[<span style="">U</span>, <span style="">T</span>](<span style="font-weight:bold">this</span>, (context, pid, iter) <span style="font-weight:bold">=&gt;</span> iter.map(cleanF))
+}
+
+ <span style="font-style:italic">/**
+</span><span style="font-style:italic">  * Return a new RDD by applying a function to each partition of this RDD.
+</span><span style="font-style:italic">  *
+</span><span style="font-style:italic">  * `preservesPartitioning` indicates whether the input function preserves the partitioner, which
+</span><span style="font-style:italic">  * should be `false` unless this is a pair RDD and the input function doesn&#39;t modify the keys.
+</span><span style="font-style:italic">  */</span>
+ <span style="font-weight:bold">def</span> mapPartitions[<span style="">U:</span> <span style="">ClassTag</span>](
+     f<span style="font-weight:bold">:</span> <span style="">Iterator</span>[<span style="">T</span>] <span style="font-weight:bold">=&gt;</span> <span style="font-weight:bold">Iterator</span>[<span style="">U</span>],
+     preservesPartitioning<span style="font-weight:bold">:</span> <span style="">Boolean</span> = <span style="font-weight:bold">false</span>)<span style="font-weight:bold">:</span> <span style="">RDD</span>[<span style="">U</span>] <span style="font-weight:bold">=</span> withScope {
+   <span style="font-weight:bold">val</span> cleanedF <span style="font-weight:bold">=</span> sc.clean(f)
+   <span style="font-weight:bold">new</span> <span style="font-weight:bold">MapPartitionsRDD</span>(
+     <span style="font-weight:bold">this</span>,
+     (context<span style="font-weight:bold">:</span> <span style="">TaskContext</span>, index<span style="font-weight:bold">:</span> <span style="">Int</span>, iter<span style="font-weight:bold">:</span> <span style="">Iterator</span>[<span style="">T</span>]) <span style="font-weight:bold">=&gt;</span> cleanedF(iter),
+     preservesPartitioning)
+ }</code></pre></div>
+<h1 id="7-groupbykey-和-reducebykey-是属于-transformation-还是-action">7 groupByKey 和 reduceByKey 是属于 Transformation 还是 Action？</h1>
+
+<p>前者，因为 Action 输出的不再是 RDD 了，也就意味着<strong>输出不是分布式的</strong>，而是回送到 Driver 程序。以上两种操作都是返回 RDD，所以应该属于 Transformation。</p>
+
+<h1 id="8-说说检查点-checkpoint-的意义">8 说说检查点 checkpoint 的意义</h1>
+
+<p>分布式编程中经常需要做检查点，即将某个时机的<strong>中间数据写到存储中</strong>。</p>
+
+<h1 id="9-说说-spark-的特点-相对于-mapreduce-来说">9 说说 Spark 的特点，相对于 MapReduce 来说</h1>
+
+<ol>
+<li>减少磁盘 I/O，MR 会把 map 端将中间输出和结果存储在磁盘中，reduce 端又需要从磁盘读写中间结果，势必造成磁盘 I/O 称为瓶颈。Spark 允许将 map 端的中间结果输出和结果存储在内存中，reduce 端在拉取中间结果的时候避免了大量的磁盘 I/O。</li>
+<li>增加并行度，由于把中间结果写到磁盘与从磁盘读取中间结果属于不同的缓解，Hadoop 将他们简单地通过串行执行衔接起来，Spark 则把不同的环节抽象成为 Stage，允许多个 Stage 既可以串行又可以并行执行。</li>
+<li>避免重新计算，当 Stage 中某个分区的 Task 执行失败后，会重新对此 Stage 调度，但在重新调度的时候会过滤已经执行成功的分区任务，所以不会造成重复计算和资源浪费。</li>
+<li>可选的 Shuffle 排序，MR 在 Shuffle 之前有着固定的排序操作，而 Spark 则可以根据不同场景选择在 map 端排序还是 reduce 排序。</li>
+<li>灵活的内存管理策略，Spark 将内存分为堆上的存储内存、堆外的存储内存，堆上的执行内存，堆外的执行内存4个部分。</li>
+</ol>
+
+<h1 id="10-task-和-stage-的分类">10 Task 和 Stage 的分类</h1>
+
+<p>Task 指具体的<strong>执行任务</strong>，一个 Job 在每个 Stage 内都会按照 RDD 的 Partition 数量，创建多个 Task，Task 分为 ShuffleMapTask 和 ResultTask 两种。</p>
+
+<p>ShuffleMapStage 中的 Task 为 ShuffleMapTask，而 ResultStage 中的 Task 为 ResultTask。</p>
+
+<p>ShuffleMapTask 和 ResultTask 类似于 Hadoop 中的 Map 任务和 Reduce 任务。</p>
+
+      </div>
+
+      <footer>
+        
+
+
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+      </div>
+
+      <footer class="footer">
+  <section class="container">
+    
+      <p>Once a gunner, always a gunner, COYG!</p>
+    
+     © 2019
+    
+       · 
+      Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+    
+    
+  </section>
+</footer>
+
+    </main>
+
+    
+
+  </body>
+
+</html>

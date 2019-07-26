@@ -6,10 +6,21 @@
     <description>Recent content in Posts on runzhliu</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Wed, 24 Jul 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 26 Jul 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://runzhliu.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Spark 面试题系列-2</title>
+      <link>https://runzhliu.github.io/posts/spark-%E9%9D%A2%E8%AF%95%E9%A2%98%E7%B3%BB%E5%88%97-2/</link>
+      <pubDate>Fri, 26 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://runzhliu.github.io/posts/spark-%E9%9D%A2%E8%AF%95%E9%A2%98%E7%B3%BB%E5%88%97-2/</guid>
+      <description>1 RDD 如何通过记录更新的方式容错 RDD 实现分布式数据集容错方法有两种:
+ 数据检查点 记录更新  RDD 采用记录更新的方式：记录所有更新点的成本很高。 所以，RDD只支持粗颗粒变换，即只记录单个块（分区 partition）上执行的单个操作，然后创建某个 RDD 的变换序列（血统 lineage）存储下来； 变换序列指，每个 RDD 都包含了它是如何由其他 RDD 变换过来的以及如何重建某一块数据的信息。因此 RDD 的容错机制又称“血统”容错。
+2 Spark 优越性 Spark 的几个优势  更高的性能。因为数据被加载到集群主机的分布式内存中。数据可以被快速的转换迭代，并缓存用以后续的频繁访问需求。在数据全部加载到内存的情况下，Spark 可以比 Hadoop 快100倍，在内存不够存放所有数据的情况下快 Hadoop 10倍。 通过建立在 Java, Scala, Python, SQL（应对交互式查询）的标准API以方便各行各业使用，同时还含有大量开箱即用的机器学习库。 与现有 Hadoop 1和2.x(YARN)生态兼容，因此机构可以无缝迁移，目前也在做 Yarn 3 的支持。 方便下载和安装。方便的 shell（REPL: Read-Eval-Print-Loop）可以对 API 进行交互式的学习。 借助高等级的架构提高生产力，从而可以讲精力放到计算上。  MapReduce 与 Spark 相比，有哪些异同点  基本原理上 1.1 MapReduce: 基于磁盘的大数据批量处理系统 1.2 Spark: 基于 RDD (弹性分布式数据集)数据处理，显示将 RDD 数据存储到磁盘和内存中。 模型上 2.</description>
+    </item>
     
     <item>
       <title>Spark 面试题系列</title>
