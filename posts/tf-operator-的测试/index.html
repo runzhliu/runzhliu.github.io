@@ -11,10 +11,16 @@
 
     <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="tf-operator 的测试"/>
-<meta name="twitter:description" content=""/>
+<meta name="twitter:description" content="1 Overview 近期组内掌管的资源利用效率不够高，我们正在想办法在混部集群（游戏&#43;离线任务），多跑一些离线任务。平台之前提供过一些大规模机器学习的模块给算法同学使用，效果不错，但是因为交互以及和 K8S 的集成问题，还有就是人力问题，没有做的很好，最近调研了一些 tf-operator，准备底层进行整合，给用户提供更好的机器学习训练的体验。
+关于 tf-operator，可以参考官网和 Github 仓库，简单理解，tf-operator 就是让用户在 K8S 集群上部署训练任务更加方便和简单。
+2 Setups 因为 Kubeflow 安利：在 Kubernetes 上进行机器学习 内容已经比较老了，Kubeflow 有了一些模块的调整，而且官网的部署介绍是基于整个所有 component 的，但是我只想跑一个 tf-operator 的测试程序，所以从官网提供的部署方法里，抠一些脚本出来，单独部署一个 tf-opertor。
+2.1 Prerequisite  Kubernetes 集群，Mac 用户可以是 Docker for Mac，或者 Minikube 安装好 Ksonnet，略懂 Ksonnet 和 Jsonnet 有过使用 Tensorflow 的经验  2.2 Run # 指定工作目录 APP_NAME=my-kubeflow ks init ${APP_NAME} cd ${APP_NAME} # 指定 ks registry，方便安装 pkg ks registry add kubeflow github.com/kubeflow/kubeflow/tree/master/kubeflow # 安装需要的 pkg，官方提供的脚本 kfctl."/>
 
     <meta property="og:title" content="tf-operator 的测试" />
-<meta property="og:description" content="" />
+<meta property="og:description" content="1 Overview 近期组内掌管的资源利用效率不够高，我们正在想办法在混部集群（游戏&#43;离线任务），多跑一些离线任务。平台之前提供过一些大规模机器学习的模块给算法同学使用，效果不错，但是因为交互以及和 K8S 的集成问题，还有就是人力问题，没有做的很好，最近调研了一些 tf-operator，准备底层进行整合，给用户提供更好的机器学习训练的体验。
+关于 tf-operator，可以参考官网和 Github 仓库，简单理解，tf-operator 就是让用户在 K8S 集群上部署训练任务更加方便和简单。
+2 Setups 因为 Kubeflow 安利：在 Kubernetes 上进行机器学习 内容已经比较老了，Kubeflow 有了一些模块的调整，而且官网的部署介绍是基于整个所有 component 的，但是我只想跑一个 tf-operator 的测试程序，所以从官网提供的部署方法里，抠一些脚本出来，单独部署一个 tf-opertor。
+2.1 Prerequisite  Kubernetes 集群，Mac 用户可以是 Docker for Mac，或者 Minikube 安装好 Ksonnet，略懂 Ksonnet 和 Jsonnet 有过使用 Tensorflow 的经验  2.2 Run # 指定工作目录 APP_NAME=my-kubeflow ks init ${APP_NAME} cd ${APP_NAME} # 指定 ks registry，方便安装 pkg ks registry add kubeflow github.com/kubeflow/kubeflow/tree/master/kubeflow # 安装需要的 pkg，官方提供的脚本 kfctl." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://runzhliu.github.io/posts/tf-operator-%E7%9A%84%E6%B5%8B%E8%AF%95/" />
 <meta property="article:published_time" content="2019-07-29T00:00:00&#43;00:00"/>
@@ -103,7 +109,7 @@
             </span>
             <span class="reading-time">
               <i class="fas fa-clock"></i>
-              0 minutes read
+              2 minutes read
             </span>
           </div>
           
@@ -113,6 +119,143 @@
 
       <div>
         
+
+<h1 id="1-overview">1 Overview</h1>
+
+<p>近期组内掌管的资源利用效率不够高，我们正在想办法在混部集群（游戏+离线任务），多跑一些离线任务。平台之前提供过一些大规模机器学习的模块给算法同学使用，效果不错，但是因为交互以及和 K8S 的集成问题，还有就是人力问题，没有做的很好，最近调研了一些 tf-operator，准备底层进行整合，给用户提供更好的机器学习训练的体验。</p>
+
+<p>关于 tf-operator，可以参考官网和 Github 仓库，简单理解，tf-operator 就是让用户在 K8S 集群上部署训练任务更加方便和简单。</p>
+
+<h1 id="2-setups">2 Setups</h1>
+
+<p>因为 <a href="https://blog.dongyueweb.com/kubeflow_%E5%AE%89%E5%88%A9%EF%BC%9A%E5%9C%A8_kubernetes_%E4%B8%8A%E8%BF%9B%E8%A1%8C%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html">Kubeflow 安利：在 Kubernetes 上进行机器学习</a> 内容已经比较老了，Kubeflow 有了一些模块的调整，而且官网的部署介绍是基于整个所有 component 的，但是我只想跑一个 tf-operator 的测试程序，所以从官网提供的部署方法里，抠一些脚本出来，单独部署一个 tf-opertor。</p>
+
+<h2 id="2-1-prerequisite">2.1 Prerequisite</h2>
+
+<ol>
+<li>Kubernetes 集群，Mac 用户可以是 Docker for Mac，或者 Minikube</li>
+<li>安装好 Ksonnet，略懂 Ksonnet 和 Jsonnet</li>
+<li>有过使用 Tensorflow 的经验</li>
+</ol>
+
+<h2 id="2-2-run">2.2 Run</h2>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="font-style:italic"># 指定工作目录</span>
+APP_NAME=my-kubeflow
+ks init <span style="font-weight:bold;font-style:italic">${</span>APP_NAME<span style="font-weight:bold;font-style:italic">}</span>
+cd <span style="font-weight:bold;font-style:italic">${</span>APP_NAME<span style="font-weight:bold;font-style:italic">}</span>
+
+<span style="font-style:italic"># 指定 ks registry，方便安装 pkg</span>
+ks registry add kubeflow github.com/kubeflow/kubeflow/tree/master/kubeflow
+
+<span style="font-style:italic"># 安装需要的 pkg，官方提供的脚本 kfctl.sh 会安装所有 pkg，这里我们只装需要的</span>
+ks pkg install kubeflow/common
+ks pkg install kubeflow/tf-training
+
+<span style="font-style:italic"># all 已经可以替代所安装的 pkg 了</span>
+ks generate all
+ks apply all</code></pre></div>
+<p>按照👆的程序，就可以部署好 tf-operator 了。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"># 默认在 default namespace 下
+# kubectl get pods
+➜  my-kubeflow git:(master) ✗ kubectl get all
+NAME                                    READY   STATUS      RESTARTS   AGE
+pod/tf-job-operator-665c879f79-6p7pj    1/1     Running     0          137m
+
+NAME                                       TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+service/kubernetes                         ClusterIP   10.96.0.1       &lt;none&gt;        443/TCP    4h23m
+service/tf-job-operator                    ClusterIP   10.99.30.170    &lt;none&gt;        8443/TCP   137m
+
+NAME                               READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/tf-job-operator    1/1     1            1           137m
+
+NAME                                          DESIRED   CURRENT   READY   AGE
+replicaset.apps/tf-job-operator-665c879f79    1         1         1       137m</pre></div>
+<p>然后再安装 <a href="https://github.com/kubeflow/tf-operator/blob/master/developer_guide.md#run-operator">example</a>，跑一个分布式的 mnist 训练任务。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cd ./examples/v1/dist-mnist
+docker build -f Dockerfile -t kubeflow/tf-dist-mnist-test:1.0 .
+kubectl create -f ./tf_job_mnist.yaml</code></pre></div>
+<p>任务启动成功，可以见到👇。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"># kubectl get pods
+NAME                                READY   STATUS              RESTARTS   AGE
+dist-mnist-for-e2e-test-ps-0        0/1     ContainerCreating   0          6s
+dist-mnist-for-e2e-test-ps-1        0/1     ContainerCreating   0          6s
+dist-mnist-for-e2e-test-worker-0    0/1     ContainerCreating   0          5s
+dist-mnist-for-e2e-test-worker-1    0/1     ContainerCreating   0          5s
+dist-mnist-for-e2e-test-worker-2    0/1     ContainerCreating   0          5s
+dist-mnist-for-e2e-test-worker-3    0/1     ContainerCreating   0          5s
+tf-job-dashboard-7b99dcff48-wq5cw   1/1     Running             0          139m
+tf-job-operator-665c879f79-6p7pj    1/1     Running             0          139m</pre></div>
+<p>可以通过 <code>get</code> 来查看 <code>status</code>。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"># kubectl get tfjobs.kubeflow.org dist-mnist-for-e2e-test -o yaml
+apiVersion: kubeflow.org/v1
+kind: TFJob
+metadata:
+  creationTimestamp: &#34;2019-07-29T06:41:53Z&#34;
+  generation: 1
+  name: dist-mnist-for-e2e-test
+  namespace: default
+  resourceVersion: &#34;11825&#34;
+  selfLink: /apis/kubeflow.org/v1/namespaces/default/tfjobs/dist-mnist-for-e2e-test
+  uid: f3c0a2c6-b1cb-11e9-9279-0800274cd279
+spec:
+  tfReplicaSpecs:
+    PS:
+      replicas: 2
+      restartPolicy: Never
+      template:
+        spec:
+          containers:
+          - image: kubeflow/tf-dist-mnist-test:1.0
+            name: tensorflow
+    Worker:
+      replicas: 4
+      restartPolicy: Never
+      template:
+        spec:
+          containers:
+          - image: kubeflow/tf-dist-mnist-test:1.0
+            name: tensorflow
+status:
+  completionTime: &#34;2019-07-29T09:09:15Z&#34;
+  conditions:
+  - lastTransitionTime: &#34;2019-07-29T08:51:17Z&#34;
+    lastUpdateTime: &#34;2019-07-29T08:51:17Z&#34;
+    message: TFJob dist-mnist-for-e2e-test is created.
+    reason: TFJobCreated
+    status: &#34;True&#34;
+    type: Created
+  - lastTransitionTime: &#34;2019-07-29T09:02:50Z&#34;
+    lastUpdateTime: &#34;2019-07-29T09:09:14Z&#34;
+    message: TFJob dist-mnist-for-e2e-test is running.
+    reason: TFJobRunning
+    status: &#34;False&#34;
+    type: Running
+  - lastTransitionTime: &#34;2019-07-29T09:09:15Z&#34;
+    lastUpdateTime: &#34;2019-07-29T09:09:15Z&#34;
+    message: TFJob dist-mnist-for-e2e-test successfully completed.
+    reason: TFJobSucceeded
+    status: &#34;True&#34;
+    type: Succeeded
+  replicaStatuses:
+    PS:
+      succeeded: 2
+    Worker:
+      succeeded: 4
+  startTime: &#34;2019-07-29T08:51:17Z&#34;</pre></div>
+<h1 id="3-summary">3 Summary</h1>
+
+<p>上面的例子，讲解了如何在 K8S 集群运行 tf-operator 并且提交分布式的训练任务。</p>
+
+<h1 id="reference">Reference</h1>
+
+<ol>
+<li><a href="https://blog.dongyueweb.com/kubeflow_%E5%AE%89%E5%88%A9%EF%BC%9A%E5%9C%A8_kubernetes_%E4%B8%8A%E8%BF%9B%E8%A1%8C%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html">Kubeflow 安利：在 Kubernetes 上进行机器学习</a></li>
+<li><a href="https://github.com/kubeflow/tf-operator">kubeflow/tf-operator</a></li>
+<li><a href="https://github.com/kubeflow/kubeflow">kubeflow/kubeflow</a></li>
+<li><a href="https://github.com/tensorflow/examples/blob/master/community/en/docs/deploy/distributed.md">Distributed Tesorflow</a></li>
+<li><a href="https://www.youtube.com/watch?v=xMaCC3uzBU8">KubeFlow CPU/GPU Demo</a></li>
+</ol>
+
       </div>
 
       <footer>

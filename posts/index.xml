@@ -17,7 +17,10 @@
       <pubDate>Mon, 29 Jul 2019 00:00:00 +0000</pubDate>
       
       <guid>https://runzhliu.github.io/posts/tf-operator-%E7%9A%84%E6%B5%8B%E8%AF%95/</guid>
-      <description></description>
+      <description>1 Overview 近期组内掌管的资源利用效率不够高，我们正在想办法在混部集群（游戏+离线任务），多跑一些离线任务。平台之前提供过一些大规模机器学习的模块给算法同学使用，效果不错，但是因为交互以及和 K8S 的集成问题，还有就是人力问题，没有做的很好，最近调研了一些 tf-operator，准备底层进行整合，给用户提供更好的机器学习训练的体验。
+关于 tf-operator，可以参考官网和 Github 仓库，简单理解，tf-operator 就是让用户在 K8S 集群上部署训练任务更加方便和简单。
+2 Setups 因为 Kubeflow 安利：在 Kubernetes 上进行机器学习 内容已经比较老了，Kubeflow 有了一些模块的调整，而且官网的部署介绍是基于整个所有 component 的，但是我只想跑一个 tf-operator 的测试程序，所以从官网提供的部署方法里，抠一些脚本出来，单独部署一个 tf-opertor。
+2.1 Prerequisite  Kubernetes 集群，Mac 用户可以是 Docker for Mac，或者 Minikube 安装好 Ksonnet，略懂 Ksonnet 和 Jsonnet 有过使用 Tensorflow 的经验  2.2 Run # 指定工作目录 APP_NAME=my-kubeflow ks init ${APP_NAME} cd ${APP_NAME} # 指定 ks registry，方便安装 pkg ks registry add kubeflow github.com/kubeflow/kubeflow/tree/master/kubeflow # 安装需要的 pkg，官方提供的脚本 kfctl.</description>
     </item>
     
     <item>
